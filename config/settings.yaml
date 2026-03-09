@@ -1,0 +1,224 @@
+# =============================================================================
+# Berlin AI Talent Radar — Master Settings
+# =============================================================================
+# All configurable parameters live here. To target a different market,
+# edit market.name, market.location, and swap search_queries.yaml.
+# No code changes required.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Market Configuration — change this to target a different geography/domain
+# ---------------------------------------------------------------------------
+market:
+  name: "Berlin AI"
+  location: "Berlin, Germany"
+  country_code: "DE"
+  target_domain: "AI & Data Science"
+  description: "Berlin's AI, ML, and Data Science job market"
+
+# ---------------------------------------------------------------------------
+# Pipeline Behaviour
+# ---------------------------------------------------------------------------
+pipeline:
+  max_jobs_per_source: 500          # Hard cap per collector run
+  min_description_length: 100       # Discard postings shorter than this (chars)
+  max_description_words: 5000       # Truncate at this word count before embedding
+  dedup_fuzzy_threshold: 0.85       # SequenceMatcher ratio for cross-source dedup
+  idempotent: true                  # Overwrite existing data on re-run
+
+# ---------------------------------------------------------------------------
+# Data Sources — enable/disable individual collectors
+# ---------------------------------------------------------------------------
+sources:
+  jsearch:
+    enabled: true
+    base_url: "https://jsearch.p.rapidapi.com/search"
+    rate_limit_seconds: 1.1         # Delay between requests (free tier safe)
+    pages_per_query: 3
+    date_posted: "month"
+    output_file: "data/raw/jsearch.json"
+
+  hackernews:
+    enabled: true
+    algolia_url: "https://hn.algolia.com/api/v1/search"
+    item_url: "https://hacker-news.firebaseio.com/v0/item"
+    months_back: 6                  # Fetch last N "Who is Hiring" threads
+    output_file: "data/raw/hackernews.json"
+    filter_keywords:
+      - "berlin"
+      - "germany"
+      - "remote"
+      - "eu"
+    ai_keywords:
+      - "machine learning"
+      - "ml"
+      - "ai"
+      - "data scientist"
+      - "data engineer"
+      - "llm"
+      - "nlp"
+      - "deep learning"
+
+  arbeitnow:
+    enabled: true
+    base_url: "https://www.arbeitnow.com/api/job-board-api"
+    max_pages: 10
+    output_file: "data/raw/arbeitnow.json"
+    filter_keywords:
+      - "machine learning"
+      - "data science"
+      - "artificial intelligence"
+      - "data engineer"
+      - "llm"
+      - "nlp"
+      - "deep learning"
+
+  berlin_startup_jobs:
+    enabled: true
+    base_url: "https://berlinstartupjobs.com/skill-areas/data-science/"
+    pages: 3
+    rate_limit_seconds: 1.0
+    output_file: "data/raw/bsj.json"
+
+  eu_ai_act:
+    enabled: true
+    config_file: "config/eu_ai_act_articles.yaml"
+    output_file: "data/eu_ai_act/articles.json"
+
+# ---------------------------------------------------------------------------
+# OpenAI / LLM Configuration
+# ---------------------------------------------------------------------------
+openai:
+  embedding_model: "text-embedding-3-small"
+  embedding_dimensions: 1536
+  chat_model: "gpt-4o-mini"
+  chat_temperature: 0.3
+  chat_max_tokens: 2000
+  embedding_batch_size: 50
+  embedding_rate_limit_seconds: 0.3  # Delay between embedding batches
+  cost_per_1k_embedding_tokens: 0.00002   # USD — text-embedding-3-small
+  cost_per_1k_input_tokens: 0.00015       # USD — gpt-4o-mini input
+  cost_per_1k_output_tokens: 0.0006       # USD — gpt-4o-mini output
+  budget_eur: 30.0                        # Total project budget
+  usd_to_eur: 0.92                        # Approximate conversion rate
+
+# ---------------------------------------------------------------------------
+# Vector Store
+# ---------------------------------------------------------------------------
+vector_store:
+  backend: "numpy"          # "numpy" (default, no DB) | "pgvector" (production)
+
+  numpy:
+    save_dir: "data/embeddings"
+    jobs_file: "data/embeddings/job_chunks.npz"
+    regulations_file: "data/embeddings/regulation_chunks.npz"
+
+  pgvector:
+    host: "localhost"
+    port: 5432
+    database: "berlin_radar"
+    user: "radar"
+    password: "radar_secret"     # Override via DATABASE_URL env var in production
+    pool_size: 5
+    ivfflat_lists: 100           # IVFFlat index parameter — tune after loading data
+
+# ---------------------------------------------------------------------------
+# Chunking
+# ---------------------------------------------------------------------------
+chunking:
+  job_chunk_size_words: 400
+  job_chunk_overlap_words: 80
+  job_chunk_min_words: 50
+  eu_ai_act_chunk_size_words: 600   # Split articles larger than this
+  eu_ai_act_overlap_words: 50
+
+# ---------------------------------------------------------------------------
+# RAG Engine
+# ---------------------------------------------------------------------------
+rag:
+  default_job_top_k: 6
+  default_regulation_top_k: 3
+  legal_boost_regulation_top_k: 5   # Used when question has legal keywords
+  market_boost_job_top_k: 7         # Used when question has market keywords
+  max_total_chunks: 8               # Final merged result limit
+
+  legal_keywords:
+    - "eu ai act"
+    - "article"
+    - "compliance"
+    - "regulation"
+    - "governance"
+    - "obligation"
+    - "penalty"
+    - "high-risk"
+    - "annex"
+    - "enforcement"
+
+  market_keywords:
+    - "skill"
+    - "salary"
+    - "hiring"
+    - "company"
+    - "job"
+    - "role"
+    - "berlin"
+    - "market"
+    - "trend"
+    - "demand"
+
+# ---------------------------------------------------------------------------
+# Reliability Scorer Weights (must sum to 1.0)
+# ---------------------------------------------------------------------------
+reliability:
+  weights:
+    consensus: 0.25
+    coverage: 0.30
+    source_diversity: 0.15
+    freshness: 0.15
+    similarity_distribution: 0.15
+  thresholds:
+    high: 0.70
+    medium: 0.45
+  freshness_days:
+    full: 30      # Score 1.0 if data is this many days old or less
+    half: 90      # Score 0.5 if between full and this many days
+
+# ---------------------------------------------------------------------------
+# Analytics
+# ---------------------------------------------------------------------------
+analytics:
+  top_skills_count: 20
+  top_companies_count: 15
+  arch_exec_bins: 10
+  execution_heavy_threshold: 0.40   # Below = execution-heavy / AI-vulnerable
+  architecture_heavy_threshold: 0.70 # Above = architecture-heavy / future-proof
+  report_output_dir: "data/reports"
+  report_filename: "berlin_ai_talent_radar_report.md"
+
+# ---------------------------------------------------------------------------
+# EU AI Act Metadata
+# ---------------------------------------------------------------------------
+eu_ai_act:
+  enforcement_date: "2026-08-02"
+  max_penalty_eur: 35_000_000
+  max_penalty_turnover_pct: 7
+  reference_regulation: "EU 2024/1689"
+
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+logging:
+  level: "INFO"          # DEBUG | INFO | WARNING | ERROR
+  format: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+  datefmt: "%Y-%m-%d %H:%M:%S"
+
+# ---------------------------------------------------------------------------
+# Streamlit Dashboard
+# ---------------------------------------------------------------------------
+dashboard:
+  page_title: "Berlin AI Talent Radar"
+  page_icon: "📡"
+  layout: "wide"
+  author_name: "Data Engineer, Berlin"
+  github_url: ""
+  linkedin_url: ""

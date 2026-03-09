@@ -1,0 +1,652 @@
+# =============================================================================
+# Berlin AI Talent Radar — Skill Taxonomy
+# =============================================================================
+# 73 skills across 8 categories. Each skill has a canonical name, category,
+# and a list of regex patterns (applied case-insensitively with word boundaries).
+#
+# Adding a new skill: add a new key under the appropriate category, give it
+# patterns, and it will be automatically picked up by skill_extractor.py.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Category 1: Programming Languages (10 skills)
+# ---------------------------------------------------------------------------
+python:
+  category: "Programming Languages"
+  patterns:
+    - "\\bpython\\b"
+    - "\\bpython3\\b"
+    - "\\bpy\\b"
+
+sql:
+  category: "Programming Languages"
+  patterns:
+    - "\\bsql\\b"
+    - "\\bplsql\\b"
+    - "\\bpl/sql\\b"
+    - "\\bt-sql\\b"
+    - "\\btsql\\b"
+
+typescript:
+  category: "Programming Languages"
+  patterns:
+    - "\\btypescript\\b"
+    - "\\bts\\b(?=\\s+developer|\\s+engineer)"
+
+javascript:
+  category: "Programming Languages"
+  patterns:
+    - "\\bjavascript\\b"
+    - "\\bjs\\b(?=\\s+developer|\\s+engineer)"
+    - "\\bnode\\.?js\\b"
+    - "\\bnodejs\\b"
+
+java:
+  category: "Programming Languages"
+  patterns:
+    - "\\bjava\\b(?!script)"
+    - "\\bspring\\s+boot\\b"
+    - "\\bjvm\\b"
+
+scala:
+  category: "Programming Languages"
+  patterns:
+    - "\\bscala\\b"
+    - "\\bplay\\s+framework\\b"
+
+go:
+  category: "Programming Languages"
+  patterns:
+    - "\\bgolang\\b"
+    - "\\bgo\\s+lang\\b"
+    - "\\bgo\\s+programming\\b"
+    - "\\bgo\\s+developer\\b"
+    - "\\bgo\\s+engineer\\b"
+
+rust:
+  category: "Programming Languages"
+  patterns:
+    - "\\brust\\b(?=\\s+programming|\\s+developer|\\s+engineer|\\s+lang)"
+    - "\\brust\\s+lang\\b"
+
+r_lang:
+  category: "Programming Languages"
+  patterns:
+    - "\\br\\s+programming\\b"
+    - "\\br\\s+language\\b"
+    - "\\brstudio\\b"
+    - "\\bggplot\\b"
+    - "\\btidyverse\\b"
+    - "\\bdplyr\\b"
+    - "\\br\\s+(?:for\\s+)?data\\s+science\\b"
+
+cpp:
+  category: "Programming Languages"
+  patterns:
+    - "\\bc\\+\\+\\b"
+    - "\\bcpp\\b"
+    - "\\bc/c\\+\\+\\b"
+
+# ---------------------------------------------------------------------------
+# Category 2: LLM & GenAI (13 skills)
+# ---------------------------------------------------------------------------
+rag:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\brag\\b"
+    - "retrieval.augmented.generation"
+    - "retrieval-augmented"
+    - "\\bretrieval\\s+augmented\\b"
+
+langchain:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\blangchain\\b"
+    - "\\blang\\s+chain\\b"
+
+llamaindex:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\bllamaindex\\b"
+    - "\\bllama.index\\b"
+    - "\\bllama\\s+index\\b"
+    - "\\bgpt.index\\b"
+
+llm:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\bllm\\b"
+    - "\\bllms\\b"
+    - "large\\s+language\\s+model"
+    - "language\\s+model\\b"
+    - "\\bfoundation\\s+model\\b"
+
+gpt_api:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\bgpt-?4\\b"
+    - "\\bgpt-?3\\.?5\\b"
+    - "\\bgpt\\s+api\\b"
+    - "\\bopenai\\s+api\\b"
+    - "\\bchatgpt\\b"
+    - "\\bgpt\\b(?=\\s+integrat|\\s+model|\\s+based|\\s+powered)"
+
+prompt_engineering:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\bprompt\\s+engineering\\b"
+    - "\\bprompt\\s+design\\b"
+    - "\\bprompting\\b"
+    - "\\bprompt\\s+optim\\b"
+    - "\\bchain.of.thought\\b"
+    - "\\bfew.shot\\b"
+    - "\\bzero.shot\\b"
+
+fine_tuning:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\bfine.tun\\w+\\b"
+    - "\\bfinetuning\\b"
+    - "\\brlhf\\b"
+    - "reinforcement\\s+learning\\s+from\\s+human\\s+feedback"
+    - "\\binstruction\\s+tuning\\b"
+    - "\\bpeft\\b"
+    - "\\blora\\b"
+    - "\\bqlora\\b"
+
+embeddings:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\bembedding\\b"
+    - "\\bembeddings\\b"
+    - "\\bword2vec\\b"
+    - "\\bsentence\\s+transformers?\\b"
+    - "\\btext\\s+embedding\\b"
+    - "\\bsemantics?\\s+search\\b"
+
+vector_database:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\bvector\\s+database\\b"
+    - "\\bvector\\s+db\\b"
+    - "\\bpgvector\\b"
+    - "\\bpinecone\\b"
+    - "\\bweaviate\\b"
+    - "\\bchroma\\b"
+    - "\\bqdrant\\b"
+    - "\\bmilvus\\b"
+    - "\\bfaiss\\b"
+    - "\\bannoy\\b"
+
+ai_agents:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\bai\\s+agent\\b"
+    - "\\bagentic\\b"
+    - "\\bautonomous\\s+agent\\b"
+    - "\\bmulti.agent\\b"
+    - "\\bautogen\\b"
+    - "\\bcrewaI\\b"
+    - "\\bai\\s+workflow\\b"
+    - "\\bllm\\s+agent\\b"
+
+openai:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\bopenai\\b"
+    - "\\bopen\\s+ai\\b"
+
+anthropic_claude:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\banthropic\\b"
+    - "\\bclaude\\s+(?:api|model|sonnet|opus|haiku)\\b"
+    - "\\bclaude\\s+3\\b"
+
+huggingface:
+  category: "LLM & GenAI"
+  patterns:
+    - "\\bhugging\\s*face\\b"
+    - "\\bhuggingface\\b"
+    - "\\bhf\\s+transformers\\b"
+    - "\\btransformers\\s+library\\b"
+    - "\\bbert\\b"
+    - "\\broberta\\b"
+    - "\\bt5\\b(?=\\s+model|\\s+architecture)"
+
+# ---------------------------------------------------------------------------
+# Category 3: ML Frameworks (7 skills)
+# ---------------------------------------------------------------------------
+pytorch:
+  category: "ML Frameworks"
+  patterns:
+    - "\\bpytorch\\b"
+    - "\\btorch\\b(?=\\s+framework|\\s+model|\\s+tensor)"
+    - "\\bpyg\\b"
+
+tensorflow:
+  category: "ML Frameworks"
+  patterns:
+    - "\\btensorflow\\b"
+    - "\\btf\\b(?=\\s+model|\\s+2|\\s+serving)"
+    - "\\btfx\\b"
+
+scikit_learn:
+  category: "ML Frameworks"
+  patterns:
+    - "\\bscikit.learn\\b"
+    - "\\bsklearn\\b"
+    - "\\bscikit\\b"
+
+xgboost:
+  category: "ML Frameworks"
+  patterns:
+    - "\\bxgboost\\b"
+    - "\\bxgb\\b"
+    - "\\blightgbm\\b"
+    - "\\bcatboost\\b"
+    - "\\bgradient\\s+boosting\\b"
+
+keras:
+  category: "ML Frameworks"
+  patterns:
+    - "\\bkeras\\b"
+
+mlflow:
+  category: "ML Frameworks"
+  patterns:
+    - "\\bmlflow\\b"
+    - "\\bml\\s+flow\\b"
+
+wandb:
+  category: "ML Frameworks"
+  patterns:
+    - "\\bwandb\\b"
+    - "\\bweights\\s+(?:and|&)\\s+biases\\b"
+    - "\\bexperiment\\s+tracking\\b"
+
+# ---------------------------------------------------------------------------
+# Category 4: Data Engineering (12 skills)
+# ---------------------------------------------------------------------------
+airflow:
+  category: "Data Engineering"
+  patterns:
+    - "\\bairflow\\b"
+    - "\\bapache\\s+airflow\\b"
+    - "\\bdag\\b(?=\\s+orchestrat|\\s+pipeline|\\s+workflow)"
+
+dbt:
+  category: "Data Engineering"
+  patterns:
+    - "\\bdbt\\b"
+    - "\\bdata\\s+build\\s+tool\\b"
+
+spark:
+  category: "Data Engineering"
+  patterns:
+    - "\\bapache\\s+spark\\b"
+    - "\\bpyspark\\b"
+    - "\\bspark\\s+sql\\b"
+    - "\\bspark\\b(?=\\s+cluster|\\s+streaming|\\s+ml)"
+
+kafka:
+  category: "Data Engineering"
+  patterns:
+    - "\\bapache\\s+kafka\\b"
+    - "\\bkafka\\b(?=\\s+stream|\\s+topic|\\s+broker|\\s+consumer|\\s+producer)"
+    - "\\bkafka\\s+connect\\b"
+
+etl_pipelines:
+  category: "Data Engineering"
+  patterns:
+    - "\\betl\\b"
+    - "\\belt\\b"
+    - "\\bdata\\s+pipeline\\b"
+    - "\\bdata\\s+ingestion\\b"
+    - "\\bdata\\s+integration\\b"
+    - "\\bpipeline\\s+development\\b"
+
+data_pipeline:
+  category: "Data Engineering"
+  patterns:
+    - "\\bdata\\s+orchestration\\b"
+    - "\\bworkflow\\s+orchestration\\b"
+    - "\\bprefect\\b"
+    - "\\blake\\s+formation\\b"
+    - "\\bdataflow\\b"
+
+bigquery:
+  category: "Data Engineering"
+  patterns:
+    - "\\bbigquery\\b"
+    - "\\bbq\\b(?=\\s+query|\\s+table|\\s+dataset)"
+    - "\\bgoogle\\s+bigquery\\b"
+
+snowflake:
+  category: "Data Engineering"
+  patterns:
+    - "\\bsnowflake\\b"
+    - "\\bsnowpark\\b"
+
+databricks:
+  category: "Data Engineering"
+  patterns:
+    - "\\bdatabricks\\b"
+    - "\\bdelta\\s+lake\\b"
+    - "\\bunity\\s+catalog\\b"
+
+postgresql:
+  category: "Data Engineering"
+  patterns:
+    - "\\bpostgresql\\b"
+    - "\\bpostgres\\b"
+    - "\\bpsql\\b"
+    - "\\brelational\\s+database\\b"
+
+mongodb:
+  category: "Data Engineering"
+  patterns:
+    - "\\bmongodb\\b"
+    - "\\bmongo\\b"
+    - "\\bnosql\\b"
+    - "\\bdocument\\s+database\\b"
+
+redis:
+  category: "Data Engineering"
+  patterns:
+    - "\\bredis\\b"
+    - "\\bcaching\\s+layer\\b"
+    - "\\bin.memory\\s+cache\\b"
+
+# ---------------------------------------------------------------------------
+# Category 5: MLOps & Infrastructure (11 skills)
+# ---------------------------------------------------------------------------
+docker:
+  category: "MLOps & Infrastructure"
+  patterns:
+    - "\\bdocker\\b"
+    - "\\bcontaineriz\\w+\\b"
+    - "\\bdockerfile\\b"
+    - "\\bdocker.compose\\b"
+
+kubernetes:
+  category: "MLOps & Infrastructure"
+  patterns:
+    - "\\bkubernetes\\b"
+    - "\\bk8s\\b"
+    - "\\bhelm\\b(?=\\s+chart)"
+    - "\\bkubeflow\\b"
+
+cicd:
+  category: "MLOps & Infrastructure"
+  patterns:
+    - "\\bci/cd\\b"
+    - "\\bcicd\\b"
+    - "\\bcontinuous\\s+integration\\b"
+    - "\\bcontinuous\\s+deployment\\b"
+    - "\\bcontinuous\\s+delivery\\b"
+    - "\\bgithub\\s+actions\\b"
+    - "\\bgitlab\\s+ci\\b"
+    - "\\bjenkins\\b"
+
+aws:
+  category: "MLOps & Infrastructure"
+  patterns:
+    - "\\baws\\b"
+    - "\\bamazon\\s+web\\s+services\\b"
+    - "\\bs3\\b(?=\\s+bucket|\\s+storage)"
+    - "\\bec2\\b"
+    - "\\blambda\\b(?=\\s+function|\\s+aws)"
+    - "\\bsagemaker\\b"
+    - "\\bedge\\s+computing\\b"
+
+gcp:
+  category: "MLOps & Infrastructure"
+  patterns:
+    - "\\bgcp\\b"
+    - "\\bgoogle\\s+cloud\\b"
+    - "\\bgoogle\\s+cloud\\s+platform\\b"
+    - "\\bvertex\\s+ai\\b"
+    - "\\bcloud\\s+run\\b"
+
+azure:
+  category: "MLOps & Infrastructure"
+  patterns:
+    - "\\bazure\\b"
+    - "\\bmicrosoft\\s+azure\\b"
+    - "\\bazure\\s+ml\\b"
+    - "\\bazure\\s+openai\\b"
+    - "\\bazure\\s+devops\\b"
+
+terraform:
+  category: "MLOps & Infrastructure"
+  patterns:
+    - "\\bterraform\\b"
+    - "\\binfrastructure\\s+as\\s+code\\b"
+    - "\\biac\\b"
+    - "\\bpulumi\\b"
+
+fastapi:
+  category: "MLOps & Infrastructure"
+  patterns:
+    - "\\bfastapi\\b"
+    - "\\bfast\\s+api\\b"
+    - "\\brest\\s+api\\b"
+    - "\\brestful\\s+api\\b"
+    - "\\bflask\\b"
+    - "\\bdjango\\b(?=\\s+rest|\\s+api|\\s+backend)"
+
+streamlit:
+  category: "MLOps & Infrastructure"
+  patterns:
+    - "\\bstreamlit\\b"
+    - "\\bgradio\\b"
+    - "\\bdash\\b(?=\\s+app|\\s+dashboard|\\s+plotly)"
+
+api_design:
+  category: "MLOps & Infrastructure"
+  patterns:
+    - "\\bapi\\s+design\\b"
+    - "\\bapi\\s+development\\b"
+    - "\\bmicroservice\\b"
+    - "\\bservice.oriented\\b"
+    - "\\bgrpc\\b"
+    - "\\bgraphql\\b"
+
+linux:
+  category: "MLOps & Infrastructure"
+  patterns:
+    - "\\blinux\\b"
+    - "\\bbash\\b"
+    - "\\bshell\\s+scripting\\b"
+    - "\\bunix\\b"
+    - "\\bubuntu\\b"
+
+# ---------------------------------------------------------------------------
+# Category 6: Analytics & Visualization (5 skills)
+# ---------------------------------------------------------------------------
+tableau:
+  category: "Analytics & Visualization"
+  patterns:
+    - "\\btableau\\b"
+
+power_bi:
+  category: "Analytics & Visualization"
+  patterns:
+    - "\\bpower\\s+bi\\b"
+    - "\\bpowerbi\\b"
+    - "\\bpbi\\b"
+
+looker:
+  category: "Analytics & Visualization"
+  patterns:
+    - "\\blooker\\b"
+    - "\\blookml\\b"
+    - "\\blooker\\s+studio\\b"
+
+ab_testing:
+  category: "Analytics & Visualization"
+  patterns:
+    - "\\ba/b\\s+test\\w*\\b"
+    - "\\bab\\s+test\\w*\\b"
+    - "\\bexperimenta?\\w+\\s+platform\\b"
+    - "\\bstatistical\\s+significance\\b"
+    - "\\bhypothesis\\s+test\\w*\\b"
+
+statistics:
+  category: "Analytics & Visualization"
+  patterns:
+    - "\\bstatistic\\w*\\b"
+    - "\\bregression\\b"
+    - "\\bbayesian\\b"
+    - "\\bprobabilistic\\b"
+    - "\\bcausal\\s+inference\\b"
+    - "\\btime\\s+series\\b"
+    - "\\bforecasting\\b"
+
+# ---------------------------------------------------------------------------
+# Category 7: Domain Skills (5 skills)
+# ---------------------------------------------------------------------------
+nlp:
+  category: "Domain Skills"
+  patterns:
+    - "\\bnlp\\b"
+    - "\\bnatural\\s+language\\s+processing\\b"
+    - "\\bnatural\\s+language\\s+understanding\\b"
+    - "\\bnlu\\b"
+    - "\\btext\\s+classification\\b"
+    - "\\bnamed\\s+entity\\s+recognition\\b"
+    - "\\bner\\b(?=\\s+model|\\s+task)"
+    - "\\bsentiment\\s+analysis\\b"
+    - "\\btext\\s+mining\\b"
+
+computer_vision:
+  category: "Domain Skills"
+  patterns:
+    - "\\bcomputer\\s+vision\\b"
+    - "\\bimage\\s+recognition\\b"
+    - "\\bobject\\s+detection\\b"
+    - "\\bimage\\s+segmentation\\b"
+    - "\\bcv\\b(?=\\s+model|\\s+pipeline|\\s+engineer)"
+    - "\\bopencv\\b"
+    - "\\byolo\\b"
+
+recsys:
+  category: "Domain Skills"
+  patterns:
+    - "\\brecommendation\\s+system\\b"
+    - "\\brecommender\\s+system\\b"
+    - "\\brecsys\\b"
+    - "\\bcollaborative\\s+filtering\\b"
+    - "\\bpersonalization\\b"
+    - "\\bmatrix\\s+factorizat\\w+\\b"
+
+time_series:
+  category: "Domain Skills"
+  patterns:
+    - "\\btime\\s+series\\s+analysis\\b"
+    - "\\btime\\s+series\\s+forecast\\w+\\b"
+    - "\\bprophet\\b(?=\\s+model|\\s+forecast)"
+    - "\\barima\\b"
+    - "\\blstm\\s+forecast\\b"
+    - "\\btemporal\\s+model\\b"
+
+fraud_detection:
+  category: "Domain Skills"
+  patterns:
+    - "\\bfraud\\s+detection\\b"
+    - "\\bfraud\\s+prevention\\b"
+    - "\\banomaly\\s+detection\\b"
+    - "\\boutlier\\s+detection\\b"
+    - "\\brisk\\s+scoring\\b"
+    - "\\bcredit\\s+risk\\b"
+
+# ---------------------------------------------------------------------------
+# Category 8: Credentials & Meta (10 skills)
+# ---------------------------------------------------------------------------
+phd:
+  category: "Credentials & Meta"
+  patterns:
+    - "\\bph\\.?d\\.?\\b"
+    - "\\bdoctorate\\b"
+    - "\\bdoctoral\\b"
+    - "\\bdr\\.\\b(?=\\s+degree|\\s+title)"
+
+masters:
+  category: "Credentials & Meta"
+  patterns:
+    - "\\bm\\.?sc\\.?\\b"
+    - "\\bmaster(?:'?s)?\\s+degree\\b"
+    - "\\bmaster(?:'?s)?\\s+in\\b"
+    - "\\bm\\.?eng\\.?\\b"
+    - "\\bpostgraduate\\b"
+
+bachelors:
+  category: "Credentials & Meta"
+  patterns:
+    - "\\bb\\.?sc\\.?\\b"
+    - "\\bbachelor(?:'?s)?\\s+degree\\b"
+    - "\\bbachelor(?:'?s)?\\s+in\\b"
+    - "\\bundergraduate\\b"
+
+german_language:
+  category: "Credentials & Meta"
+  patterns:
+    - "\\bgerman\\s+(?:language|required|fluent|proficiency|skills?)\\b"
+    - "\\bdeutsch\\b"
+    - "\\bsprachkenntnisse\\b"
+    - "\\bc1\\b(?=\\s+german|\\s+deutsch)"
+    - "\\bb2\\b(?=\\s+german|\\s+deutsch)"
+
+english:
+  category: "Credentials & Meta"
+  patterns:
+    - "\\benglish\\s+(?:fluent|required|proficiency|skills?)\\b"
+    - "\\bfluent\\s+(?:in\\s+)?english\\b"
+    - "\\bbusiness\\s+english\\b"
+
+remote_hybrid:
+  category: "Credentials & Meta"
+  patterns:
+    - "\\bremote\\b"
+    - "\\bhybrid\\b"
+    - "\\bwork\\s+from\\s+home\\b"
+    - "\\bwfh\\b"
+    - "\\bflexible\\s+work\\b"
+    - "\\bdistributed\\s+team\\b"
+
+visa_sponsorship:
+  category: "Credentials & Meta"
+  patterns:
+    - "\\bvisa\\s+sponsor\\w+\\b"
+    - "\\bwork\\s+permit\\b"
+    - "\\brelocation\\s+support\\b"
+    - "\\brelocation\\s+package\\b"
+    - "\\bwilling\\s+to\\s+relocate\\b"
+
+startup_experience:
+  category: "Credentials & Meta"
+  patterns:
+    - "\\bstartup\\s+experience\\b"
+    - "\\bearly.stage\\s+startup\\b"
+    - "\\bscale.up\\b"
+    - "\\bfast.paced\\s+environment\\b"
+    - "\\bhigh.growth\\b"
+
+consulting_experience:
+  category: "Credentials & Meta"
+  patterns:
+    - "\\bconsulting\\s+experience\\b"
+    - "\\bconsultancy\\b"
+    - "\\bmanagement\\s+consulting\\b"
+    - "\\bclient.facing\\b"
+    - "\\bstakeholder\\s+management\\b"
+
+open_source:
+  category: "Credentials & Meta"
+  patterns:
+    - "\\bopen.source\\b"
+    - "\\bgithub\\s+portfolio\\b"
+    - "\\bopen\\s+source\\s+contribution\\b"
+    - "\\bpublic\\s+github\\b"
+    - "\\bkaggle\\b"

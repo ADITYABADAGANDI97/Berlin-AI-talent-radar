@@ -1,0 +1,253 @@
+# =============================================================================
+# Berlin AI Talent Radar — Governance Taxonomy
+# =============================================================================
+# Two components:
+#   1. high_risk_domains: Annex III domain detection via keyword lists
+#   2. governance_keywords: Positive signals that a posting is EU AI Act aware
+#
+# Used by: src/processors/governance_analyzer.py
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# High-Risk Domain Detection (Annex III Mapping)
+# Each domain maps to an Annex III section and a list of detection keywords.
+# A posting is flagged for a domain if ANY keyword matches (case-insensitive).
+# ---------------------------------------------------------------------------
+high_risk_domains:
+
+  Employment:
+    annex_iii_section: "Section 4"
+    annex_iii_title: "Employment, workers management and access to self-employment"
+    articles_triggered: [9, 10, 11, 13, 14, 15, 26, 50]
+    keywords:
+      - "hiring"
+      - "recruitment"
+      - "candidate screening"
+      - "cv screening"
+      - "resume screening"
+      - "performance evaluation"
+      - "performance management"
+      - "workforce management"
+      - "workforce planning"
+      - "hr analytics"
+      - "human resources"
+      - "talent acquisition"
+      - "applicant tracking"
+      - "employee monitoring"
+      - "employee engagement"
+      - "attrition prediction"
+      - "people analytics"
+      - "talent management"
+      - "headcount planning"
+      - "interview scheduling"
+      - "onboarding automation"
+
+  Essential_Services:
+    annex_iii_section: "Section 5"
+    annex_iii_title: "Access to and enjoyment of essential private services and public services and benefits"
+    articles_triggered: [9, 10, 11, 13, 14, 15]
+    keywords:
+      - "credit scoring"
+      - "credit assessment"
+      - "loan approval"
+      - "loan origination"
+      - "insurance pricing"
+      - "insurance underwriting"
+      - "financial risk assessment"
+      - "creditworthiness"
+      - "mortgage"
+      - "buy now pay later"
+      - "bnpl"
+      - "fraud scoring"
+      - "risk-based pricing"
+
+  Education:
+    annex_iii_section: "Section 3"
+    annex_iii_title: "Education and vocational training"
+    articles_triggered: [9, 10, 11, 13, 14, 15]
+    keywords:
+      - "student assessment"
+      - "learning analytics"
+      - "educational"
+      - "grading system"
+      - "admissions"
+      - "edtech"
+      - "e-learning"
+      - "adaptive learning"
+      - "tutoring system"
+      - "exam proctoring"
+      - "learning management"
+
+  Healthcare:
+    annex_iii_section: "Section 2a"
+    annex_iii_title: "Safety components of products regulated under Union harmonisation legislation"
+    articles_triggered: [9, 10, 11, 13, 14, 15]
+    keywords:
+      - "medical diagnosis"
+      - "clinical decision"
+      - "patient"
+      - "healthcare ai"
+      - "diagnostic"
+      - "radiology"
+      - "pathology"
+      - "drug discovery"
+      - "clinical trial"
+      - "medical imaging"
+      - "ehr"
+      - "electronic health record"
+      - "triage"
+      - "symptom checker"
+      - "telemedicine"
+      - "mental health"
+      - "precision medicine"
+
+  Biometrics:
+    annex_iii_section: "Section 1"
+    annex_iii_title: "Biometric identification and categorisation of natural persons"
+    articles_triggered: [9, 10, 11, 13, 14, 15]
+    keywords:
+      - "biometric"
+      - "facial recognition"
+      - "face detection"
+      - "identity verification"
+      - "liveness detection"
+      - "voice recognition"
+      - "fingerprint"
+      - "iris recognition"
+      - "deepfake detection"
+      - "age estimation"
+
+  Law_Enforcement:
+    annex_iii_section: "Section 6"
+    annex_iii_title: "Law enforcement"
+    articles_triggered: [9, 10, 11, 13, 14, 15]
+    keywords:
+      - "surveillance"
+      - "policing"
+      - "crime prediction"
+      - "predictive policing"
+      - "security screening"
+      - "threat detection"
+      - "border control"
+      - "law enforcement"
+      - "public safety ai"
+
+  Critical_Infrastructure:
+    annex_iii_section: "Section 2"
+    annex_iii_title: "Critical infrastructure"
+    articles_triggered: [9, 10, 11, 13, 14, 15]
+    keywords:
+      - "critical infrastructure"
+      - "energy grid"
+      - "smart grid"
+      - "traffic management"
+      - "autonomous vehicle"
+      - "self-driving"
+      - "water management"
+      - "power plant"
+      - "industrial control"
+      - "scada"
+      - "utility management"
+
+  Administration_of_Justice:
+    annex_iii_section: "Section 8"
+    annex_iii_title: "Administration of justice and democratic processes"
+    articles_triggered: [9, 10, 11, 13, 14, 15]
+    keywords:
+      - "legal ai"
+      - "court decision"
+      - "judicial"
+      - "sentencing"
+      - "legal document analysis"
+      - "case outcome prediction"
+      - "election"
+      - "voting system"
+
+# ---------------------------------------------------------------------------
+# Governance Keyword Detection
+# Any posting mentioning one or more of these terms is considered "governance-aware".
+# A posting with is_ai_role=True AND touches_high_risk_domain=True AND
+# governance_keyword_count=0 has the "governance_gap" flag set to True.
+# ---------------------------------------------------------------------------
+governance_keywords:
+  # Regulatory / Legal References
+  - "responsible ai"
+  - "ai ethics"
+  - "ai governance"
+  - "eu ai act"
+  - "ai regulation"
+  - "ai compliance"
+  - "ai act"
+  - "gdpr"
+  - "data protection"
+  - "conformity assessment"
+  - "ce marking"
+  - "regulatory compliance"
+
+  # Technical Safeguards
+  - "bias testing"
+  - "fairness testing"
+  - "bias mitigation"
+  - "algorithmic fairness"
+  - "human oversight"
+  - "human-in-the-loop"
+  - "hitl"
+  - "human review"
+  - "algorithmic accountability"
+  - "ai audit"
+  - "model monitoring"
+  - "model governance"
+  - "ai transparency"
+  - "explainable ai"
+  - "xai"
+  - "interpretability"
+  - "model explainability"
+  - "ai safety"
+  - "trustworthy ai"
+  - "ai risk"
+  - "risk management system"
+
+  # Organizational / Process
+  - "ai policy"
+  - "data ethics"
+  - "ethics board"
+  - "ethics review"
+  - "privacy by design"
+  - "fundamental rights"
+  - "impact assessment"
+  - "dpia"
+  - "data minimization"
+  - "consent management"
+  - "model card"
+  - "model documentation"
+  - "ai documentation"
+  - "system card"
+
+# ---------------------------------------------------------------------------
+# AI Role Detection Keywords
+# A posting is classified as is_ai_role=True if it mentions ANY of these.
+# This is a broad net — refinement happens in governance gap logic.
+# ---------------------------------------------------------------------------
+ai_role_keywords:
+  - "machine learning"
+  - "deep learning"
+  - "neural network"
+  - "artificial intelligence"
+  - " ai "
+  - "data science"
+  - "data scientist"
+  - "nlp"
+  - "natural language processing"
+  - "computer vision"
+  - "llm"
+  - "large language model"
+  - "generative ai"
+  - "gen ai"
+  - "rag"
+  - "retrieval augmented"
+  - "recommendation system"
+  - "predictive model"
+  - "ml model"
+  - "ml engineer"
+  - "ai engineer"
+  - "mlops"

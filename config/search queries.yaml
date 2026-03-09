@@ -1,0 +1,37 @@
+# =============================================================================
+# Berlin AI Talent Radar — Search Queries
+# =============================================================================
+# JSearch API queries. Changing the target market = edit location_suffix here.
+# The collector reads this file — zero code changes required for new markets.
+#
+# Used by: src/collectors/jsearch.py
+# =============================================================================
+
+# The location suffix appended to every query
+location_suffix: "Berlin Germany"
+
+# All search queries. Each becomes one JSearch API request series.
+# Expected total: ~400-500 unique postings across all queries after dedup.
+queries:
+  - "data scientist Berlin Germany"
+  - "machine learning engineer Berlin Germany"
+  - "AI engineer Berlin Germany"
+  - "data engineer Berlin Germany"
+  - "data analyst Berlin Germany"
+  - "NLP engineer Berlin Germany"
+  - "LLM engineer Berlin Germany"
+  - "RAG engineer Berlin Germany"
+  - "deep learning Berlin Germany"
+  - "computer vision Berlin Germany"
+  - "MLOps engineer Berlin Germany"
+  - "AI researcher Berlin Germany"
+  - "generative AI Berlin Germany"
+  - "Python developer Berlin AI Germany"
+  - "data science Berlin Germany"
+
+# JSearch-specific parameters
+jsearch_params:
+  num_pages: 3
+  date_posted: "month"      # "all" | "today" | "3days" | "week" | "month"
+  country: "de"
+  language: "en"

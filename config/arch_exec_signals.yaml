@@ -1,0 +1,155 @@
+# =============================================================================
+# Berlin AI Talent Radar — Architecture-Execution Spectrum Signals
+# =============================================================================
+# Original analytical framework for predicting role AI-vulnerability.
+#
+# The Spectrum:
+#   0.0 = Pure Execution  → task-focused, tool-specific, AI will replace (3-5 yr)
+#   1.0 = Pure Architecture → judgment-focused, system-design, AI amplifies
+#
+# Signals are detected via case-insensitive substring/regex matching on the
+# full job description. Each matched signal contributes +1 to the relevant
+# score bucket. Tier 1 signals count double (weight=2.0).
+#
+# Score formula:
+#   arch_exec_score = arch_score / (arch_score + exec_score + 0.001)
+#   Clamped to [0.0, 1.0]
+#
+# Used by: src/processors/arch_exec_scorer.py
+# =============================================================================
+
+architecture_signals:
+
+  tier1:
+    weight: 2.0
+    description: "Strong architectural indicators — high-judgment, design-oriented work"
+    signals:
+      - "system design"
+      - "systems design"
+      - "design systems"
+      - "architecture"
+      - "architect"
+      - "technical vision"
+      - "technical direction"
+      - "technical strategy"
+      - "trade-off"
+      - "tradeoff"
+      - "trade off"
+      - "end-to-end ownership"
+      - "full ownership"
+      - "end to end ownership"
+      - "cross-functional"
+      - "cross functional"
+      - "stakeholder management"
+      - "stakeholder communication"
+      - "roadmap"
+      - "technical roadmap"
+      - "strategy"
+      - "ambiguity"
+      - "undefined requirements"
+      - "mentor"
+      - "coaching"
+      - "guide junior"
+      - "grow the team"
+      - "team growth"
+
+  tier2:
+    weight: 1.0
+    description: "Moderate architectural indicators — decision-making, influence"
+    signals:
+      - "design decisions"
+      - "decision making"
+      - "scalability"
+      - "at scale"
+      - "evaluate"
+      - "assess"
+      - "recommend approaches"
+      - "influence"
+      - "align teams"
+      - "define standards"
+      - "best practices"
+      - "technical debt"
+      - "tech debt"
+      - "define requirements"
+      - "system thinking"
+      - "systems thinking"
+      - "problem framing"
+      - "technical leadership"
+      - "thought leadership"
+      - "research agenda"
+      - "drive adoption"
+      - "platform thinking"
+      - "innersource"
+      - "technical governance"
+
+execution_signals:
+
+  tier1:
+    weight: 2.0
+    description: "Strong execution indicators — task-focused, tool-specific, replaceable by AI"
+    # Note: year-experience pattern is handled via regex in code:
+    #   r'\d+\s*\+?\s*years?.{0,30}experience'
+    use_year_experience_regex: true
+    signals:
+      - "build dashboards"
+      - "create dashboards"
+      - "write queries"
+      - "write sql"
+      - "maintain pipelines"
+      - "maintain systems"
+      - "implement features"
+      - "implement solutions"
+      - "assist"
+      - "support the team"
+      - "under supervision"
+      - "reporting to"
+      - "hands-on coding"
+      - "write code daily"
+      - "day-to-day coding"
+
+  tier2:
+    weight: 1.0
+    description: "Moderate execution indicators — routine, process-bound tasks"
+    signals:
+      - "bug fixes"
+      - "troubleshoot"
+      - "debug"
+      - "follow established"
+      - "according to specifications"
+      - "update documentation"
+      - "data entry"
+      - "data cleaning"
+      - "data labeling"
+      - "data annotation"
+      - "copy paste"
+      - "daily standups"
+      - "ticket management"
+      - "jira tickets"
+      - "on-call"
+      - "production support"
+      - "incident response"
+      - "runbook"
+
+# ---------------------------------------------------------------------------
+# Interpretation Thresholds
+# ---------------------------------------------------------------------------
+thresholds:
+  execution_heavy: 0.40    # Below this → AI-vulnerable role
+  balanced: 0.55           # Between execution_heavy and here → balanced
+  architecture_heavy: 0.70 # Above this → future-proof role
+
+labels:
+  execution_heavy: "Execution-Heavy (AI-Vulnerable)"
+  balanced: "Balanced"
+  architecture_light: "Architecture-Leaning"
+  architecture_heavy: "Architecture-Heavy (Future-Proof)"
+
+# ---------------------------------------------------------------------------
+# Seniority Hypothesis (for validation in analytics)
+# ---------------------------------------------------------------------------
+seniority_hypothesis:
+  intern: 0.25        # Expected average score
+  junior: 0.35
+  mid: 0.50
+  senior: 0.65
+  lead: 0.75

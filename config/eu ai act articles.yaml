@@ -1,0 +1,484 @@
+# =============================================================================
+# Berlin AI Talent Radar — EU AI Act Key Articles
+# =============================================================================
+# Structured text of key EU AI Act articles and Annex III.
+# Source: Regulation (EU) 2024/1689 — Official Journal of the European Union
+# Enforcement date: 2026-08-02 (Articles 6-49, 51-85, 89-95, 97, 98, Annex I-XIII)
+#
+# Each article becomes one or more Chunks in the vector store with full metadata.
+# Used by: src/collectors/eu_ai_act.py
+# =============================================================================
+
+enforcement_date: "2026-08-02"
+regulation_reference: "Regulation (EU) 2024/1689"
+official_journal: "OJ L 2024/1689"
+penalty_reference: "Article 99 — up to €35,000,000 or 7% of global turnover"
+
+articles:
+
+  - number: 6
+    title: "Classification rules for high-risk AI systems"
+    chapter: "III"
+    section: "1"
+    penalty_reference: "Article 99"
+    enforcement_date: "2026-08-02"
+    text: |
+      Article 6 — Classification rules for high-risk AI systems
+
+      1. Irrespective of whether an AI system is placed on the market or put into service 
+      independently from the products referred to in points (a) and (b), that AI system shall 
+      be considered to be high-risk where both of the following conditions are fulfilled:
+      (a) the AI system is intended to be used as a safety component of a product, or the AI 
+      system is itself a product, covered by the Union harmonisation legislation listed in 
+      Annex I;
+      (b) the product whose safety component pursuant to point (a) is the AI system, or the 
+      AI system itself as a product, is required to undergo a third-party conformity assessment 
+      with a view to the placing on the market or the putting into service of that product 
+      pursuant to the Union harmonisation legislation listed in Annex I.
+
+      2. In addition to the high-risk AI systems referred to in paragraph 1, AI systems 
+      referred to in Annex III shall be considered to be high-risk.
+
+      3. By derogation from paragraph 2, an AI system referred to in Annex III shall not be 
+      considered to be high-risk where it does not pose a significant risk of harm to the health, 
+      safety or fundamental rights of natural persons, including by not materially influencing 
+      the outcome of decision-making.
+
+      Key Implication for Employers: Any AI system used in employment decisions — recruitment, 
+      performance evaluation, promotion — is automatically classified as high-risk under Annex III 
+      Section 4. This includes AI-assisted CV screening, candidate ranking, interview scheduling AI, 
+      and employee monitoring systems. Berlin employers building or deploying such systems must 
+      comply with Articles 9-15 before August 2, 2026.
+
+  - number: 9
+    title: "Risk management system"
+    chapter: "III"
+    section: "2"
+    penalty_reference: "Article 99"
+    enforcement_date: "2026-08-02"
+    text: |
+      Article 9 — Risk management system
+
+      1. A risk management system shall be established, implemented, documented and maintained 
+      in relation to high-risk AI systems.
+
+      2. The risk management system shall be understood as a continuous iterative process planned 
+      and run throughout the entire lifecycle of a high-risk AI system, requiring regular systematic 
+      review and updating. It shall comprise the following steps:
+      (a) the identification and analysis of the known and the reasonably foreseeable risks that 
+      the high-risk AI system can pose to health, safety or fundamental rights when the high-risk 
+      AI system is used in accordance with its intended purpose;
+      (b) the estimation and evaluation of the risks that may emerge when the high-risk AI system 
+      is used in accordance with its intended purpose, and under conditions of reasonably foreseeable 
+      misuse;
+      (c) the evaluation of other risks possibly arising, based on the analysis of data gathered from 
+      the post-market monitoring system;
+      (d) the adoption of appropriate and targeted risk management measures designed to address 
+      the risks identified pursuant to point (a).
+
+      3. The risk management measures referred to in paragraph 2, point (d), shall give due 
+      consideration to the effects and possible interactions resulting from the combined application 
+      of the requirements set out in this Section. They shall take into account the generally 
+      acknowledged state of the art, including as reflected in relevant harmonised standards or 
+      common specifications.
+
+      4. The risk management measures referred to in paragraph 2, point (d), shall be such that the 
+      relevant residual risk associated with each hazard as well as the overall residual risk of 
+      the high-risk AI systems is judged to be acceptable.
+
+      Talent Implication: Employers must hire or contract professionals with skills in AI risk 
+      management, bias assessment, and systematic risk documentation. Job postings for high-risk 
+      AI roles that omit risk management requirements may indicate non-compliance posture.
+
+  - number: 10
+    title: "Data and data governance"
+    chapter: "III"
+    section: "2"
+    penalty_reference: "Article 99"
+    enforcement_date: "2026-08-02"
+    text: |
+      Article 10 — Data and data governance
+
+      1. High-risk AI systems which make use of techniques involving the training of AI models 
+      with data shall be developed on the basis of training, validation and testing data sets that 
+      meet the quality criteria referred to in paragraphs 2 to 5.
+
+      2. Training, validation and testing data sets shall be subject to data governance and 
+      management practices appropriate for the intended purpose of the high-risk AI system. 
+      Those practices shall concern in particular:
+      (a) the relevant design choices;
+      (b) data collection processes and the origin of data, and in the case of personal data, 
+      the original purpose of the data collection;
+      (c) relevant data-preparation processing operations, such as annotation, labelling, 
+      cleaning, updating, enrichment and aggregation;
+      (d) the formulation of assumptions, in particular with respect to the information that the 
+      data are supposed to measure and represent;
+      (e) an assessment of the availability, quantity and suitability of the data sets;
+      (f) examination in view of possible biases that are likely to affect health or safety or 
+      lead to discrimination prohibited by Union law;
+      (g) appropriate measures to detect, prevent and mitigate possible biases.
+
+      3. Training, validation and testing data sets shall be relevant, sufficiently representative, 
+      and to the best extent possible, free of errors and complete in view of the intended purpose.
+
+      Talent Implication: Data engineers and ML engineers working on high-risk AI must document 
+      data provenance, implement bias testing, and maintain data governance frameworks. These 
+      requirements create demand for professionals skilled in data quality, fairness metrics, 
+      and data documentation practices.
+
+  - number: 11
+    title: "Technical documentation"
+    chapter: "III"
+    section: "2"
+    penalty_reference: "Article 99"
+    enforcement_date: "2026-08-02"
+    text: |
+      Article 11 — Technical documentation
+
+      1. The technical documentation of a high-risk AI system shall be drawn up before that system 
+      is placed on the market or put into service and shall be kept up-to date.
+
+      2. The technical documentation shall be drawn up in such a way as to demonstrate that the 
+      high-risk AI system complies with the requirements set out in this Section and to provide 
+      national competent authorities and notified bodies with the necessary information to assess 
+      the compliance of the AI system with those requirements. It shall contain, at a minimum, 
+      the elements set out in Annex IV.
+
+      Annex IV Requirements (Summary):
+      - General description of the AI system including intended purpose and version
+      - Description of the elements and of the development process
+      - Information on the monitoring, functioning and control of the AI system
+      - Description of the risk management system
+      - Description of any change made to the system throughout its lifecycle
+      - List of the harmonised standards applied
+      - Copy of the EU declaration of conformity
+      - Description of the system for evaluating performance in post-market phase
+
+      Talent Implication: Creates demand for ML engineers and data scientists who can produce 
+      formal technical documentation, model cards, and system documentation conforming to 
+      regulatory standards — a skill largely absent from current Berlin AI job postings.
+
+  - number: 13
+    title: "Transparency and provision of information to deployers"
+    chapter: "III"
+    section: "2"
+    penalty_reference: "Article 99"
+    enforcement_date: "2026-08-02"
+    text: |
+      Article 13 — Transparency and provision of information to deployers
+
+      1. High-risk AI systems shall be designed and developed in such a way as to ensure that 
+      their operation is sufficiently transparent to enable deployers to interpret the system's 
+      output and use it appropriately. An appropriate type and degree of transparency shall be 
+      ensured with a view to achieving compliance with the relevant obligations of the provider 
+      and deployer set out in Section 3 of this Chapter.
+
+      2. High-risk AI systems shall be accompanied by instructions for use in an appropriate 
+      digital format or otherwise, that include concise, complete, correct and clear information 
+      that is relevant, accessible and comprehensible to deployers.
+
+      3. The instructions for use shall contain at least the following information:
+      (a) the identity and the contact details of the provider and, where applicable, of its 
+      authorised representative;
+      (b) the characteristics, capabilities and limitations of performance of the high-risk AI 
+      system, including the intended purpose;
+      (c) changes to the high-risk AI system and its performance made by the provider in the 
+      post-market monitoring phase;
+      (d) the human oversight measures, including the technical measures put in place to 
+      facilitate the interpretation of the outputs of AI systems by the deployers;
+      (e) the computational infrastructure required;
+      (f) the expected lifetime of the high-risk AI system and any necessary maintenance and 
+      care measures to ensure the proper functioning of that AI system.
+
+      Talent Implication: Explainability and interpretability (XAI) become legal requirements, 
+      not nice-to-haves. Engineers working on high-risk systems must be able to produce 
+      deployer-facing documentation explaining model behavior, limitations, and oversight procedures.
+
+  - number: 14
+    title: "Human oversight"
+    chapter: "III"
+    section: "2"
+    penalty_reference: "Article 99"
+    enforcement_date: "2026-08-02"
+    text: |
+      Article 14 — Human oversight
+
+      1. High-risk AI systems shall be designed and developed in such a way, including with 
+      appropriate human-machine interface tools, that they can be effectively overseen by 
+      natural persons during the period in which the AI systems are in use.
+
+      2. Human oversight shall aim at preventing or minimising the risks to health, safety or 
+      fundamental rights that may emerge when a high-risk AI system is used in accordance with 
+      its intended purpose or under conditions of reasonably foreseeable misuse.
+
+      3. Human oversight shall be ensured through one or more of the following measures:
+      (a) measures identified and built into the high-risk AI system by the provider before 
+      placing it on the market or putting it into service;
+      (b) measures identified by the provider before placing the high-risk AI system on the 
+      market or putting it into service that are appropriate to be implemented by the deployer.
+
+      4. For the purposes of implementing paragraphs 1 to 3, the high-risk AI system shall be 
+      provided to the deployer with the technical means to ensure that the natural persons to 
+      whom human oversight has been assigned are able to:
+      (a) properly understand the capacities and limitations of the high-risk AI system;
+      (b) be aware of the possible tendency of automatically relying or over-relying on the 
+      output produced by a high-risk AI system (automation bias);
+      (c) correctly interpret the output of the high-risk AI system, in particular where it 
+      comes in the form of probabilities;
+      (d) in any specific situation, decide not to use the high-risk AI system or to otherwise 
+      disregard, override or reverse the output of the high-risk AI system;
+      (e) intervene in the operation of the high-risk AI system or interrupt it through a 'stop' 
+      button or a similar procedure.
+
+      Talent Implication: Every high-risk AI system deployed by Berlin employers must have 
+      human oversight mechanisms designed in from the start. This creates specific engineering 
+      requirements — override mechanisms, audit trails, confidence displays, and explainability 
+      interfaces — that almost zero current job postings mention. The gap between what the 
+      law requires and what companies are hiring for is the core finding of this report.
+
+  - number: 15
+    title: "Accuracy, robustness and cybersecurity"
+    chapter: "III"
+    section: "2"
+    penalty_reference: "Article 99"
+    enforcement_date: "2026-08-02"
+    text: |
+      Article 15 — Accuracy, robustness and cybersecurity
+
+      1. High-risk AI systems shall be designed and developed in such a way that they achieve, 
+      in the light of their intended purpose, an appropriate level of accuracy, robustness, and 
+      cybersecurity, and perform consistently in those respects throughout their lifecycle.
+
+      2. The levels of accuracy and the relevant accuracy metrics of high-risk AI systems shall 
+      be declared in the accompanying instructions for use.
+
+      3. High-risk AI systems shall be resilient as regards errors, faults or inconsistencies 
+      that may occur within the system or the environment in which the system operates, in 
+      particular where such errors, faults or inconsistencies may lead to significant harm to 
+      health, safety or fundamental rights.
+
+      4. The robustness of high-risk AI systems may be achieved through technical redundancy 
+      solutions, which may include backup or fail-safe plans.
+
+      5. High-risk AI systems that continue to learn after being placed on the market or put 
+      into service shall be developed in such a way that potentially discriminatory impacts 
+      resulting from outputs used as an input for future operations are duly addressed with 
+      appropriate mitigation measures.
+
+      Talent Implication: Continuous learning systems (recommenders, fraud models, HR AI) 
+      require ongoing bias monitoring and robustness testing — distinct engineering disciplines 
+      that must be part of the engineering role, not afterthoughts.
+
+  - number: 26
+    title: "Obligations of deployers of high-risk AI systems"
+    chapter: "III"
+    section: "3"
+    penalty_reference: "Article 99"
+    enforcement_date: "2026-08-02"
+    text: |
+      Article 26 — Obligations of deployers of high-risk AI systems
+
+      1. Deployers of high-risk AI systems shall take appropriate technical and organisational 
+      measures to ensure they use such systems in accordance with the instructions for use 
+      accompanying the systems.
+
+      2. Deployers shall assign the task of human oversight to natural persons who have the 
+      necessary competence, training and authority to carry out that role.
+
+      3. The obligations set out in paragraphs 1 and 2 are without prejudice to other deployer 
+      obligations under Union or national law and to the deployer's freedom to organise its own 
+      resources and activities for the purpose of implementing the human oversight measures.
+
+      4. Deployers shall use the information provided under Article 13 to comply with their 
+      obligation to carry out a data protection impact assessment under Article 35 of Regulation 
+      (EU) 2016/679 where applicable.
+
+      5. Deployers of high-risk AI systems referred to in point 4 of Annex III (employment 
+      decisions) shall inform the workers' representatives and the workers about the use of 
+      the high-risk AI system at the workplace before putting it into service.
+
+      6. Deployers of high-risk AI systems that are public authorities, or private entities 
+      providing services on behalf of public authorities shall carry out a fundamental rights 
+      impact assessment before putting the AI system into service.
+
+      7. Deployers shall keep the logs automatically generated by the high-risk AI system to 
+      the extent such logs are under their control.
+
+      Employment-Specific Implication (Paragraph 5): Any Berlin company using AI in hiring, 
+      performance evaluation, or workforce management MUST inform workers and works councils 
+      (Betriebsrat) before deployment. This is a hard legal obligation, not a best practice. 
+      Failure carries penalties up to €15,000,000 or 3% of global turnover (Article 99(3)).
+
+  - number: 27
+    title: "Fundamental rights impact assessment for certain deployers"
+    chapter: "III"
+    section: "3"
+    penalty_reference: "Article 99"
+    enforcement_date: "2026-08-02"
+    text: |
+      Article 27 — Fundamental rights impact assessment for certain deployers of high-risk AI systems
+
+      1. Prior to deploying a high-risk AI system listed in Annex III, with the exception of 
+      high-risk AI systems referred to in point 2 of Annex III, deployers that are bodies governed 
+      by public law, or private operators providing public services, and deployers of high-risk AI 
+      systems referred to in points 5(b) and 6(a) to (d) of Annex III, shall perform a fundamental 
+      rights impact assessment.
+
+      2. The fundamental rights impact assessment shall include at a minimum:
+      (a) a description of the deployer's processes in which the high-risk AI system will be used 
+      in line with its intended purpose;
+      (b) a description of the period of time and frequency within which the high-risk AI system 
+      is intended to be used;
+      (c) the categories of natural persons and groups likely to be affected by its use in the 
+      specific context;
+      (d) the specific risks of harm likely to impact the categories of persons or groups of persons 
+      identified pursuant to point (c), taking into account the information given by the provider;
+      (e) a description of the implementation of human oversight measures;
+      (f) the measures to be taken in the case of the materialisation of those risks.
+
+  - number: 50
+    title: "Transparency obligations for certain AI systems"
+    chapter: "IV"
+    section: null
+    penalty_reference: "Article 99"
+    enforcement_date: "2026-08-02"
+    text: |
+      Article 50 — Transparency obligations for certain AI systems
+
+      1. Providers shall ensure that AI systems intended to interact directly with natural persons 
+      are designed and developed in such a way that the natural persons concerned are informed that 
+      they are interacting with an AI system, unless this is obvious from the circumstances and the 
+      context of use. This obligation shall not apply to AI systems authorised by law to detect, 
+      prevent, investigate or prosecute criminal offences.
+
+      2. Providers of AI systems, including general-purpose AI systems, generating synthetic audio, 
+      image, video or text content, shall ensure that the outputs of the AI system are marked in a 
+      machine-readable format and detectable as artificially generated or manipulated.
+
+      3. Deployers of an emotion recognition system or a biometric categorisation system shall 
+      inform the natural persons exposed thereto of the operation of the system. They shall process 
+      the personal data in accordance with Regulations (EU) 2016/679 and (EU) 2018/1725 and 
+      Directive 2016/680.
+
+      4. Deployers of an AI system that generates or manipulates image, audio or video content 
+      constituting a deep fake shall disclose that the content has been artificially generated or 
+      manipulated.
+
+      5. The information obligations for deployers referred to in paragraphs 3 and 4 shall not 
+      apply where the use is authorised by law to detect, prevent, investigate, prosecute or 
+      punish criminal offences, provided that the rights of the persons affected are adequately 
+      protected.
+
+      Talent Implication: AI systems must disclose their AI nature to users. This has direct 
+      product and engineering implications for Berlin companies deploying chatbots, screening AI, 
+      recommendation engines, and synthetic content systems.
+
+  - number: 99
+    title: "Penalties"
+    chapter: "XII"
+    section: null
+    penalty_reference: "This article"
+    enforcement_date: "2026-08-02"
+    text: |
+      Article 99 — Penalties
+
+      1. Member States shall lay down the rules on penalties and other enforcement measures 
+      applicable to infringements of this Regulation by operators, and shall take all measures 
+      necessary to ensure that they are properly and effectively implemented, thereby taking into 
+      account the guidelines issued by the Commission pursuant to Article 96.
+
+      2. The penalties shall be effective, proportionate and dissuasive. They shall take into 
+      account the interests of SMEs, including start-ups, and their economic viability.
+
+      3. Member States shall ensure that the following administrative fines are imposed:
+
+      (a) non-compliance with the prohibition of the AI practices referred to in Article 5:
+      UP TO €35,000,000 or, if the offender is an undertaking, up to 7% of its total worldwide 
+      annual turnover for the preceding financial year, whichever is higher;
+
+      (b) non-compliance of the AI system with the requirements laid down in Article 10:
+      UP TO €15,000,000 or, if the offender is an undertaking, up to 3% of its total worldwide 
+      annual turnover for the preceding financial year, whichever is higher;
+
+      (c) the supply of incorrect, incomplete or misleading information to notified bodies and 
+      national competent authorities in reply to a request:
+      UP TO €7,500,000 or, if the offender is an undertaking, up to 1% of its total worldwide 
+      annual turnover for the preceding financial year, whichever is higher.
+
+      4. For SMEs, including start-ups, each fine referred to in paragraph 3 shall be at most 
+      the percentages or amounts referred to in paragraph 3, whichever is lower.
+
+      Context for Berlin: Berlin has 500+ AI startups and scale-ups, many of which deploy 
+      high-risk AI systems in employment, healthcare, and financial services. The vast majority 
+      have zero EU AI Act compliance language in their job postings, suggesting the compliance 
+      infrastructure is not being built. Enforcement begins August 2, 2026.
+
+annex_iii:
+  title: "Annex III — High-Risk AI Systems referred to in Article 6(2)"
+  text: |
+    ANNEX III
+    HIGH-RISK AI SYSTEMS REFERRED TO IN ARTICLE 6(2)
+
+    High-risk AI systems pursuant to Article 6(2) are AI systems listed in any of the following 
+    areas:
+
+    1. Biometric identification and categorisation of natural persons:
+    (a) AI systems intended to be used for the real-time and post remote biometric identification 
+    of natural persons; save for those AI systems mentioned in Article 6(1)(a) in respect of 
+    real-time remote biometric identification in publicly accessible spaces for law enforcement 
+    purposes.
+
+    2. Critical infrastructure:
+    AI systems intended to be used as safety components in the management and operation of 
+    road traffic and the supply of water, gas, heating and electricity.
+
+    3. Education and vocational training:
+    AI systems intended to be used for the purpose of determining access or assigning natural 
+    persons to educational and vocational training institutions or programmes at all levels, as 
+    well as AI systems intended to be used for the purpose of evaluating learning outcomes of 
+    natural persons in educational and vocational training institutions.
+
+    4. Employment, workers management and access to self-employment:
+    (a) AI systems intended to be used for the recruitment or selection of natural persons, notably 
+    for advertising vacancies, screening or filtering applications, evaluating candidates in the 
+    course of interviews or tests;
+    (b) AI systems intended to be used for making decisions on promotion and termination of 
+    work-related contractual relationships, for task allocation and for monitoring and evaluating 
+    performance and behaviour of persons in such relationships.
+
+    5. Access to and enjoyment of essential private services and public services and benefits:
+    (a) AI systems intended to be used by public authorities or on behalf of public authorities 
+    to evaluate the eligibility of natural persons for essential public assistance benefits and 
+    services;
+    (b) AI systems intended to be used to evaluate the credit-worthiness of natural persons or 
+    establish their credit score, with the exception of AI systems put into service by small scale 
+    providers for their own use;
+    (c) AI systems intended to be used for risk assessment and pricing in relation to natural persons 
+    in the case of life and health insurance.
+
+    6. Law enforcement:
+    (a) AI systems intended to be used by competent authorities as polygraphs and similar tools or 
+    to detect the emotional state of a natural person;
+    (b) AI systems intended to be used by competent authorities to assess the risk of a natural person 
+    for offending or reoffending, or the risk for potential victims of criminal offences;
+    (c) AI systems intended to be used by competent authorities for the evaluation of the reliability 
+    of evidence in the course of investigation or prosecution of criminal offences.
+
+    7. Migration, asylum and border control management:
+    AI systems intended to be used by competent authorities or on behalf of competent authorities 
+    in areas of migration, asylum and border control management.
+
+    8. Administration of justice and democratic processes:
+    (a) AI systems intended to be used by a judicial authority or on its behalf to research and 
+    interpret facts and the law and to apply the law to a concrete set of facts, or to be used in 
+    a similar way in alternative dispute resolution;
+    (b) AI systems intended to be used to influence the outcome of an election or referendum or 
+    the voting behaviour of natural persons in the exercise of their vote in elections or referenda.
+
+    CRITICAL CONTEXT FOR BERLIN AI EMPLOYERS:
+    Section 4 (Employment) is the most directly relevant to Berlin's AI job market. Any company 
+    using AI to screen CVs, rank candidates, schedule interviews, evaluate employee performance, 
+    or predict attrition is operating a high-risk AI system under EU law. This covers N26, Zalando, 
+    Delivery Hero, Personio, and virtually every company with an ML-assisted HR workflow. 
+    Enforcement begins August 2, 2026. Current job postings reveal almost no compliance 
+    infrastructure being built.
