@@ -1,7 +1,7 @@
 # 📡 Berlin AI Talent Radar
 
 > Production-grade RAG intelligence platform analyzing Berlin's AI job market 
-> against EU AI Act compliance. Built by a Data Engineer in Berlin.
+> against EU AI Act compliance. 
 
 ## What This Does
 
