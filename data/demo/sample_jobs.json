@@ -1,0 +1,125 @@
+[
+  {
+    "company": "Acme Bank GmbH",
+    "title": "Senior ML Engineer, Credit Scoring",
+    "location": "Berlin, Germany",
+    "description": "<p>We are looking for a senior ML engineer to build and own our credit scoring and loan approval models. You will own the system design and architecture of the risk platform end-to-end, mentor junior engineers, drive the technical roadmap, and influence stakeholders across product and risk. You will make architectural trade-offs and define standards. Required: 5+ years experience with Python, PyTorch, SQL, Docker, Kubernetes, AWS. RAG, LangChain and LLM experience a plus. Build models for risk-based pricing and creditworthiness scoring at scale.</p>",
+    "date_posted": "2026-05-08",
+    "url": "https://example.com/acme/credit-scoring",
+    "source": "jsearch",
+    "source_id": "demo_jsearch_001"
+  },
+  {
+    "company": "Acme Bank GmbH",
+    "title": "ML Engineer, Fraud Detection",
+    "location": "Berlin, Germany",
+    "description": "Join the Acme fraud detection team to build models for credit assessment, fraud scoring, and risk-based pricing. You will write SQL queries daily, maintain pipelines, and implement features against established specifications. We want 3+ years of hands-on coding experience with Python, scikit-learn, XGBoost, Airflow, and PostgreSQL. Reporting to a Lead Engineer. On-call rotation expected.",
+    "date_posted": "2026-05-12",
+    "url": "https://example.com/acme/fraud",
+    "source": "jsearch",
+    "source_id": "demo_jsearch_002"
+  },
+  {
+    "company": "Deepset",
+    "title": "Senior RAG Engineer",
+    "location": "Berlin, Germany",
+    "description": "Deepset is hiring a Senior RAG Engineer to define the technical strategy and architecture of our retrieval platform. You will own end-to-end system design, mentor the team, and drive adoption of best practices across cross-functional product teams. Strong experience required with RAG, LangChain, LlamaIndex, embeddings, vector databases, prompt engineering, fine tuning, and Python. We work with Kubernetes, Docker, MLflow, and Weights & Biases. Hybrid working model. 6+ years experience.",
+    "date_posted": "2026-05-15",
+    "url": "https://example.com/deepset/senior-rag",
+    "source": "hackernews",
+    "source_id": "demo_hn_001",
+    "hn_month": "2026-05"
+  },
+  {
+    "company": "Deepset",
+    "title": "ML Engineer, GenAI Platform",
+    "location": "Berlin, Germany",
+    "description": "Join Deepset to build the next generation of GenAI tooling. You will work on the RAG platform, integrate LLMs, build vector database pipelines, and ship LangChain-based features. Required: Python, PyTorch, embeddings, prompt engineering, Docker. Remote-friendly. 3-4 years experience.",
+    "date_posted": "2026-04-22",
+    "url": "https://example.com/deepset/ml-genai",
+    "source": "hackernews",
+    "source_id": "demo_hn_002",
+    "hn_month": "2026-04"
+  },
+  {
+    "company": "Bio Health AG",
+    "title": "Data Scientist, Talent Intelligence",
+    "location": "Berlin, Germany",
+    "description": "Bio Health is building responsible AI for HR analytics, candidate screening, and resume screening. You will work alongside our Trust & Safety team on bias audits, transparency reports, model cards, fairness testing, and human oversight workflows. We document risk and follow our model governance framework. Tools: Python, scikit-learn, NLP libraries, MLflow. Required: 3 years experience with people analytics or talent acquisition systems.",
+    "date_posted": "2026-05-02",
+    "url": "https://example.com/biohealth/talent-ds",
+    "source": "arbeitnow",
+    "source_id": "demo_arbeitnow_001"
+  },
+  {
+    "company": "MediScan Diagnostics",
+    "title": "AI Engineer, Medical Imaging",
+    "location": "Berlin, Germany",
+    "description": "We are hiring an AI engineer to work on medical imaging and clinical decision support. You will train deep learning models on diagnostic imaging datasets. This is a hands-on role implementing features against detailed specifications, debugging models, and maintaining production pipelines. Required: PyTorch, computer vision, healthcare imaging experience, Docker. 2-3 years experience. Working with clinical AI systems.",
+    "date_posted": "2026-05-19",
+    "url": "https://example.com/mediscan/ai-imaging",
+    "source": "arbeitnow",
+    "source_id": "demo_arbeitnow_002"
+  },
+  {
+    "company": "EduTech Berlin",
+    "title": "ML Engineer, Adaptive Learning",
+    "location": "Berlin, Germany",
+    "description": "EduTech Berlin builds an adaptive learning platform for higher education. We use machine learning for student assessment, learning analytics, and personalized tutoring. Our compliance team maintains documentation, conducts impact assessment, and runs regular bias audits. You will work on the recommendation engine. Required: Python, TensorFlow, recommender systems. 3 years experience.",
+    "date_posted": "2026-04-30",
+    "url": "https://example.com/edutech/adaptive",
+    "source": "arbeitnow",
+    "source_id": "demo_arbeitnow_003"
+  },
+  {
+    "company": "Zalando",
+    "title": "Principal Engineer, Search Platform",
+    "location": "Berlin, Germany",
+    "description": "Lead the technical vision and architecture for Zalando's search platform. You will own the technical strategy, make architectural trade-offs at scale, mentor staff engineers, and drive adoption of platform thinking across teams. Define standards, evaluate technical debt, and influence engineering culture across the search org. Required: deep system design experience, distributed systems, Elasticsearch, Python, Java. 10+ years experience expected.",
+    "date_posted": "2026-05-18",
+    "url": "https://example.com/zalando/principal",
+    "source": "jsearch",
+    "source_id": "demo_jsearch_003"
+  },
+  {
+    "company": "Zalando",
+    "title": "Data Engineer, Marketing Analytics",
+    "location": "Berlin, Germany",
+    "description": "Join the marketing analytics team. You will write SQL queries, build dashboards, maintain pipelines, and update documentation according to specifications. Implement features for the analytics platform. Required: Python, SQL, Airflow, dbt. 2+ years experience. Hybrid working arrangement.",
+    "date_posted": "2026-05-10",
+    "url": "https://example.com/zalando/data-eng",
+    "source": "jsearch",
+    "source_id": "demo_jsearch_004"
+  },
+  {
+    "company": "N26",
+    "title": "Werkstudent Data Analyst (Praktikum)",
+    "location": "Berlin, Germany",
+    "description": "Werkstudentenstelle bei N26. Du baust Dashboards, schreibst SQL Queries, machst Data Cleaning und Data Labeling, und unterstuetzt das Analytics-Team in der täglichen Arbeit. Fließendes Deutsch ist zwingend erforderlich. Du nimmst an Daily Standups teil und schließt Jira Tickets. Bachelor-Student, idealerweise im 4.+ Semester.",
+    "date_posted": "2026-04-28",
+    "url": "https://example.com/n26/werkstudent",
+    "source": "bsj",
+    "source_id": "demo_bsj_001"
+  },
+  {
+    "company": "TalentBridge",
+    "title": "Lead Engineer, Hiring Platform",
+    "location": "Berlin, Germany",
+    "description": "TalentBridge runs an applicant tracking and CV screening platform. We are the leading talent acquisition AI in DACH. Lead the engineering team for our hiring product — own the technical roadmap, mentor senior engineers, make architectural trade-offs. Required: distributed systems experience, Python, AWS. The product handles candidate screening, performance evaluation, and workforce planning use cases. 8+ years experience.",
+    "date_posted": "2026-04-15",
+    "url": "https://example.com/talentbridge/lead",
+    "source": "hackernews",
+    "source_id": "demo_hn_003",
+    "hn_month": "2026-04"
+  },
+  {
+    "company": "Flixbus",
+    "title": "Junior Frontend Developer",
+    "location": "Berlin, Germany",
+    "description": "Build user interfaces for the Flixbus booking platform. You will implement features, debug bugs, and follow established patterns. Required: TypeScript, React, JavaScript, CSS. 0-2 years experience. Remote-friendly. We work in 2-week sprints with daily standups.",
+    "date_posted": "2026-05-05",
+    "url": "https://example.com/flixbus/junior-fe",
+    "source": "arbeitnow",
+    "source_id": "demo_arbeitnow_004"
+  }
+]
