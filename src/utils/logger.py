@@ -11,9 +11,30 @@ Usage:
     logger.info("Pipeline stage started")
 """
 
+import io
 import logging
 import sys
 from typing import Optional
+
+
+def _utf8_stdout() -> "io.TextIOBase":
+    """
+    Return a UTF-8 writer over stdout's underlying buffer.
+
+    Windows defaults to cp1252 for console I/O, which crashes on any
+    non-ASCII character in a log message (arrows, emoji, German
+    umlauts). Wrapping the buffer with a UTF-8 TextIOWrapper makes the
+    project's logging robust on all platforms. Falls back to the
+    plain stream if the buffer attribute is unavailable (e.g. when
+    pytest captures stdout).
+    """
+    stream = sys.stdout
+    buffer = getattr(stream, "buffer", None)
+    if buffer is None:
+        return stream
+    return io.TextIOWrapper(
+        buffer, encoding="utf-8", errors="replace", line_buffering=True,
+    )
 
 
 def get_logger(
@@ -50,7 +71,7 @@ def get_logger(
 
     logger.setLevel(level)
 
-    handler = logging.StreamHandler(sys.stdout)
+    handler = logging.StreamHandler(_utf8_stdout())
     handler.setLevel(level)
 
     format_str = fmt or (
