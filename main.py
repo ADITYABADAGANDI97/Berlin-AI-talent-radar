@@ -11,6 +11,7 @@ Usage::
     python main.py process              # Stage 3: enrich raw -> EnrichedJob
     python main.py embed                # Stage 4: chunk + embed + persist
     python main.py analyze              # Stage 6: produce analytics.json
+    python main.py report               # Stage 8: render markdown report
     python main.py query "..."          # Stage 5: ask the RAG engine
     python main.py status               # what's been run, what hasn't
     python main.py full                 # collect -> process -> embed -> analyze
@@ -210,6 +211,22 @@ def cmd_analyze(args: argparse.Namespace) -> None:
     engine.run(jobs, cost_summary=cost_summary)
 
 
+def cmd_report(args: argparse.Namespace) -> None:
+    """Stage 8 — render the markdown executive report from analytics.json."""
+    from src.models import AnalyticsResult
+    from src.reports import ReportGenerator
+
+    analytics_path = PROJECT_ROOT / "data" / "reports" / "analytics.json"
+    if not analytics_path.exists():
+        logger.error("No analytics.json found. Run 'analyze' or 'demo' first.")
+        return
+
+    raw = load_json(analytics_path)
+    result = AnalyticsResult(**raw)
+    target = ReportGenerator().save(result)
+    logger.info("Report written to %s", target)
+
+
 def cmd_query(args: argparse.Namespace) -> None:
     """Stage 5 — ask the RAG engine one question and print the result."""
     from src.embeddings import Embedder
@@ -307,6 +324,7 @@ def cmd_full(args: argparse.Namespace) -> None:
     cmd_process(args)
     cmd_embed(args)
     cmd_analyze(args)
+    cmd_report(args)
     logger.info("Full pipeline complete")
 
 
@@ -337,9 +355,10 @@ def cmd_demo(args: argparse.Namespace) -> None:
 
     cmd_process(args)
     cmd_analyze(args)
+    cmd_report(args)
     logger.info(
         "Demo complete. Launch the dashboard with: "
-        "streamlit run dashboard/app.py"
+        "streamlit run app/app.py"
     )
     logger.info(
         "To enable the RAG chat tab, export OPENAI_API_KEY and run "
@@ -363,6 +382,7 @@ def main() -> None:
     subparsers.add_parser("process", help="Stage 3: enrich raw jobs")
     subparsers.add_parser("embed", help="Stage 4: chunk, embed, persist vectors")
     subparsers.add_parser("analyze", help="Stage 6: produce analytics.json")
+    subparsers.add_parser("report", help="Stage 8: render markdown report")
     subparsers.add_parser("full", help="Run the full pipeline")
     subparsers.add_parser("demo", help="Run with synthetic sample data")
     subparsers.add_parser("status", help="Show pipeline status")
@@ -379,6 +399,7 @@ def main() -> None:
         "process": cmd_process,
         "embed": cmd_embed,
         "analyze": cmd_analyze,
+        "report": cmd_report,
         "query": cmd_query,
         "status": cmd_status,
         "full": cmd_full,

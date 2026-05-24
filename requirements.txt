@@ -1,0 +1,22 @@
+# Berlin AI Talent Radar — runtime dependencies
+#
+# Pin floors based on the versions used during development; minor / patch
+# upgrades within the same major are expected to remain compatible.
+# Install with: pip install -r requirements.txt
+
+# Core
+pydantic>=2.0,<3.0          # Typed models (v2 API)
+pyyaml>=6.0                 # Config files
+requests>=2.31              # HTTP client for collectors
+beautifulsoup4>=4.12        # HTML parsing for the Berlin Startup Jobs scraper
+
+# Embeddings + RAG (only needed for 'embed' / 'query' commands)
+openai>=1.50                # text-embedding-3-small + gpt-4o-mini
+
+# Vector store + analytics
+numpy>=1.26                 # Vector math + numpy-backed store
+
+# Dashboard
+streamlit>=1.30             # Interactive dashboard host
+plotly>=5.18                # Charts
+pandas>=2.0                 # Tabular data shaping for charts

@@ -1,0 +1,6 @@
+# Berlin AI Talent Radar — development dependencies
+#
+# Install both with: pip install -r requirements.txt -r requirements-dev.txt
+
+-r requirements.txt
+pytest>=7.0
