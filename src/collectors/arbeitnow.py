@@ -17,6 +17,7 @@ API docs: https://www.arbeitnow.com/api/job-board-api
 
 import hashlib
 import re
+from datetime import datetime, timezone
 from typing import Any
 
 import requests
@@ -249,11 +250,28 @@ class ArbeitnowCollector(BaseCollector):
             title=raw.get("title") or "Unknown Role",
             location=location,
             description=raw.get("description") or "",
-            date_posted=raw.get("created_at") or raw.get("published_at"),
+            date_posted=self._normalize_date(
+                raw.get("created_at") or raw.get("published_at")
+            ),
             url=raw.get("url") or "",
             source=self.source_name,
             source_id=source_id,
         )
+
+    @staticmethod
+    def _normalize_date(value: Any) -> str | None:
+        """
+        Coerce Arbeitnow's date field to an ISO string.
+
+        The API returns ``created_at`` as a Unix timestamp (int) for
+        most postings, occasionally as an ISO-formatted string. RawJob
+        types ``date_posted`` as ``str | None`` so we normalize here.
+        """
+        if value is None or value == "":
+            return None
+        if isinstance(value, (int, float)):
+            return datetime.fromtimestamp(int(value), tz=timezone.utc).strftime("%Y-%m-%d")
+        return str(value)
 
     @staticmethod
     def _hash_job(raw: dict[str, Any]) -> str:
