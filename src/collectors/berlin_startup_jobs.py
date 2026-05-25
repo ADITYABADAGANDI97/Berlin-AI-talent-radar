@@ -198,6 +198,12 @@ class BerlinStartupJobsCollector(BaseCollector):
         content = (post.get("content") or {}).get("rendered", "")
 
         company, locations = self._extract_terms(post)
+        # BSJ titles often end with " // Company" — that's already in the
+        # company field, so strip it to keep the title clean in the UI.
+        if company and "//" in title:
+            head, _, tail = title.rpartition("//")
+            if company.strip().lower() in tail.strip().lower():
+                title = head.strip(" -–—")
         location = ", ".join(locations) if locations else "Berlin, Germany"
         date_posted = self._extract_date(post.get("date"))
         url = post.get("link") or ""

@@ -94,8 +94,14 @@ class ArchExecScorer(BaseProcessor):
             exec_raw += self._year_exp_weight
             exec_found.append("year-experience-pattern")
 
-        # Normalize; epsilon keeps the formula safe when both buckets are zero
-        score = arch_raw / (arch_raw + exec_raw + 0.001)
+        # Laplace-smoothed score: with no evidence the score is 0.5
+        # (neutral); the smoothing constant acts as one pseudo-signal on
+        # each side. Without this, a short posting that matched one arch
+        # keyword and zero exec keywords scored 1.00, which produced an
+        # implausible cluster of "perfect" architecture roles on the
+        # dashboard's top-postings list.
+        alpha = 1.0
+        score = (arch_raw + alpha) / (arch_raw + exec_raw + 2 * alpha)
         score = max(0.0, min(1.0, score))
 
         return {

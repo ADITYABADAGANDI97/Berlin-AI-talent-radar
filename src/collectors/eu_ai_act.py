@@ -214,13 +214,16 @@ class EUAIActCollector(BaseCollector):
             logger.warning("Article at index %d is not a dict — skipping", idx)
             return None
 
-        article_number = article.get("article_number")
+        # Accept either schema: the canonical 'article_number'/'article_title'
+        # or the shorter 'number'/'title' used in config/eu_ai_act_articles.yaml.
+        article_number = article.get("article_number") or article.get("number")
         article_title = article.get("article_title") or article.get("title")
         text = article.get("text") or article.get("content")
 
         if not article_number:
             logger.warning(
-                "Article at index %d missing 'article_number' — skipping", idx
+                "Article at index %d missing 'article_number'/'number' — skipping",
+                idx,
             )
             return None
 

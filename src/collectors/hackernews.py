@@ -38,7 +38,9 @@ from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-_ALGOLIA_URL = "https://hn.algolia.com/api/v1/search"
+# /search returns relevance-ordered hits, which surfaces viral old threads.
+# /search_by_date returns the most recent matches first, which is what we want.
+_ALGOLIA_URL = "https://hn.algolia.com/api/v1/search_by_date"
 _HN_ITEM_URL = "https://hacker-news.firebaseio.com/v0/item/{}.json"
 _WHOISHIRING_USER = "whoishiring"
 _MAX_MONTHS = 6
@@ -182,10 +184,14 @@ class HackerNewsCollector(BaseCollector):
             List of dicts with keys ``objectID`` and ``hn_month``
             (``"YYYY-MM"`` string), sorted most-recent first.
         """
+        # Filter to threads created at most ~max_months × 32 days ago, with a
+        # small safety margin so a thread on the boundary still shows up.
+        oldest_allowed = int(time.time()) - (self._max_months * 32 * 86400)
         params = {
             "query": "Ask HN: Who is Hiring?",
             "tags": f"story,author_{_WHOISHIRING_USER}",
-            "hitsPerPage": 20,
+            "hitsPerPage": max(self._max_months * 2, 12),
+            "numericFilters": f"created_at_i>{oldest_allowed}",
         }
         try:
             response = requests.get(
@@ -373,17 +379,23 @@ class HackerNewsCollector(BaseCollector):
         if not raw_text:
             return None
 
-        # Strip HTML tags (HN API returns HTML-encoded text)
+        # HN's API returns HTML-encoded text (named entities like &amp;
+        # plus numeric ones like &#x2F;). Use html.unescape so we handle
+        # the full set in one call — the old selective regex left
+        # entities like &#x2F; visible in titles ("AI&#x2F;ML Engineer").
+        import html
         text = re.sub(r"<[^>]+>", " ", raw_text)
-        text = re.sub(r"&amp;", "&", text)
-        text = re.sub(r"&lt;", "<", text)
-        text = re.sub(r"&gt;", ">", text)
-        text = re.sub(r"&quot;", '"', text)
-        text = re.sub(r"&#x27;", "'", text)
+        text = html.unescape(text)
         text = re.sub(r"\s+", " ", text).strip()
 
         # Attempt to parse "Company | Role | Location | ..."
-        company, title, location = self._extract_header(text)
+        # Skip postings whose company name we cannot identify cleanly —
+        # leaving them in produces "Unknown (HN)" clustering at the top
+        # of the employer chart, which is visibly broken in the UI.
+        header = self._extract_header(text)
+        if header is None:
+            return None
+        company, title, location = header
 
         comment_id = str(comment.get("id", ""))
         source_id = f"hn_{comment_id}" if comment_id else self._hash_text(text)
@@ -413,35 +425,53 @@ class HackerNewsCollector(BaseCollector):
         )
 
     @staticmethod
-    def _extract_header(text: str) -> tuple[str, str, str]:
+    def _extract_header(text: str) -> tuple[str, str, str] | None:
         """
-        Extract company, role, and location from pipe-delimited HN format.
+        Extract company, role, and location from a pipe-delimited HN post.
 
-        HN convention: "Company | Role | Location | Remote? | Description"
+        HN convention: ``Company | Role | Location | Remote? | Description``
 
-        Args:
-            text: Cleaned comment text.
+        Returns the tuple when the comment matches that convention with a
+        plausible company name. Returns ``None`` otherwise — the caller
+        skips those postings instead of bucketing them under a placeholder
+        like ``"Unknown (HN)"``, which previously dominated the dashboard's
+        employer chart.
 
-        Returns:
-            Tuple of (company, title, location).  Falls back to
-            generic strings if the format is not found.
+        A company name is considered plausible when it:
+          - has 2–80 characters,
+          - contains at least one letter,
+          - is not a URL,
+          - is not a multi-sentence chunk of text.
         """
-        # Try pipe-delimited format
         parts = [p.strip() for p in text.split("|")]
-        if len(parts) >= 3:
-            company = parts[0][:100]
-            title = parts[1][:150]
-            location = parts[2][:100]
-            return company, title, location
+        if len(parts) < 3:
+            return None
 
-        # Try newline-separated header
-        lines = [l.strip() for l in text.split("\n") if l.strip()]
-        if len(lines) >= 2:
-            company = lines[0][:100]
-            title = lines[1][:150]
-            return company, title, "Berlin / Germany"
+        company = parts[0][:100]
+        if not HackerNewsCollector._is_plausible_company(company):
+            return None
 
-        return "Unknown (HN)", text[:100], "Berlin / Germany"
+        title = parts[1][:150].strip()
+        if not title:
+            return None
+
+        location = (parts[2][:100] or "Berlin / Germany").strip()
+        return company, title, location
+
+    @staticmethod
+    def _is_plausible_company(value: str) -> bool:
+        """True if ``value`` looks like a real company name."""
+        v = value.strip()
+        if not 2 <= len(v) <= 80:
+            return False
+        if not re.search(r"[A-Za-z]", v):
+            return False
+        # URLs or sentences aren't company names.
+        if re.search(r"https?://", v, re.IGNORECASE):
+            return False
+        if v.count(".") > 1 or v.count(",") > 1:
+            return False
+        return True
 
     @staticmethod
     def _hash_text(text: str) -> str:

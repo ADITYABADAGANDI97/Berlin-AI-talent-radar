@@ -10,6 +10,7 @@ Config: reads ``pipeline.min_description_length`` and
 ``pipeline.max_description_words`` from ``config/settings.yaml``.
 """
 
+import html
 import re
 from typing import Any
 
@@ -30,7 +31,6 @@ class Cleaner(BaseProcessor):
     """
 
     _HTML_TAG = re.compile(r"<[^>]+>")
-    _HTML_ENTITY = re.compile(r"&\w+;|&#\d+;")
     _MULTI_SPACE = re.compile(r"[ \t]+")
     _MULTI_NEWLINE = re.compile(r"\n{3,}")
 
@@ -48,9 +48,12 @@ class Cleaner(BaseProcessor):
         )
 
     def clean(self, text: str) -> str:
-        """Strip HTML and collapse whitespace."""
+        """Strip HTML tags, decode entities, and collapse whitespace."""
         text = self._HTML_TAG.sub(" ", text)
-        text = self._HTML_ENTITY.sub(" ", text)
+        # Decode named (&amp;) and numeric (&#x2F;, &#x27;) entities.
+        # The previous regex replaced entities with a space, which silently
+        # destroyed content like "AI&#x2F;ML" → "AI ML" in titles.
+        text = html.unescape(text)
         text = self._MULTI_SPACE.sub(" ", text)
         text = self._MULTI_NEWLINE.sub("\n\n", text)
         lines = [line.strip() for line in text.splitlines()]

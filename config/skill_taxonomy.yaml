@@ -605,15 +605,9 @@ english:
     - "\\bfluent\\s+(?:in\\s+)?english\\b"
     - "\\bbusiness\\s+english\\b"
 
-remote_hybrid:
-  category: "Credentials & Meta"
-  patterns:
-    - "\\bremote\\b"
-    - "\\bhybrid\\b"
-    - "\\bwork\\s+from\\s+home\\b"
-    - "\\bwfh\\b"
-    - "\\bflexible\\s+work\\b"
-    - "\\bdistributed\\s+team\\b"
+# Note: remote / hybrid is a job-property captured by EnrichedJob.is_remote
+# (set by metadata_detector.py). It is intentionally NOT a "skill" — listing it
+# here would dominate the Skills tab without telling the reader anything new.
 
 visa_sponsorship:
   category: "Credentials & Meta"
@@ -642,11 +636,7 @@ consulting_experience:
     - "\\bclient.facing\\b"
     - "\\bstakeholder\\s+management\\b"
 
-open_source:
-  category: "Credentials & Meta"
-  patterns:
-    - "\\bopen.source\\b"
-    - "\\bgithub\\s+portfolio\\b"
-    - "\\bopen\\s+source\\s+contribution\\b"
-    - "\\bpublic\\s+github\\b"
-    - "\\bkaggle\\b"
+# Note: open-source contributions are a credential, not a technical skill.
+# The phrase "open source" appears in nearly every modern engineering posting
+# (e.g. "open-source frameworks"), which made this match almost every job
+# and crowded out real skills on the dashboard's Skills tab.

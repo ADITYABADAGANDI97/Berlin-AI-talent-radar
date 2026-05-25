@@ -19,27 +19,25 @@ high_risk_domains:
     annex_iii_section: "Section 4"
     annex_iii_title: "Employment, workers management and access to self-employment"
     articles_triggered: [9, 10, 11, 13, 14, 15, 26, 50]
+    # Tightened keywords: removed "hiring", "recruitment", "human resources"
+    # because they appear in nearly every job posting's recruiting boilerplate
+    # ("we're hiring"), which produced a flood of false positives. The kept
+    # keywords describe AI features that are actually deployed against people.
     keywords:
-      - "hiring"
-      - "recruitment"
       - "candidate screening"
       - "cv screening"
       - "resume screening"
-      - "performance evaluation"
-      - "performance management"
+      - "performance evaluation ai"
+      - "performance management system"
       - "workforce management"
       - "workforce planning"
       - "hr analytics"
-      - "human resources"
-      - "talent acquisition"
+      - "talent acquisition platform"
       - "applicant tracking"
       - "employee monitoring"
-      - "employee engagement"
       - "attrition prediction"
       - "people analytics"
-      - "talent management"
-      - "headcount planning"
-      - "interview scheduling"
+      - "interview scheduling automation"
       - "onboarding automation"
 
   Essential_Services:
@@ -65,40 +63,40 @@ high_risk_domains:
     annex_iii_section: "Section 3"
     annex_iii_title: "Education and vocational training"
     articles_triggered: [9, 10, 11, 13, 14, 15]
+    # Removed "educational" and "admissions" — too broad (matched
+    # "educational toys", "educational background", "admissions team").
     keywords:
       - "student assessment"
       - "learning analytics"
-      - "educational"
       - "grading system"
-      - "admissions"
       - "edtech"
-      - "e-learning"
+      - "e-learning platform"
       - "adaptive learning"
       - "tutoring system"
       - "exam proctoring"
-      - "learning management"
+      - "learning management system"
 
   Healthcare:
     annex_iii_section: "Section 2a"
     annex_iii_title: "Safety components of products regulated under Union harmonisation legislation"
     articles_triggered: [9, 10, 11, 13, 14, 15]
+    # Removed "patient", "diagnostic", "mental health", "ehr" — too broad
+    # (matched "patient (adjective)", "diagnostic tools/logs", "mental health
+    # benefits", and 'ehr' triggered on substrings).
     keywords:
       - "medical diagnosis"
+      - "medical diagnostic"
       - "clinical decision"
-      - "patient"
       - "healthcare ai"
-      - "diagnostic"
       - "radiology"
       - "pathology"
       - "drug discovery"
       - "clinical trial"
       - "medical imaging"
-      - "ehr"
       - "electronic health record"
-      - "triage"
+      - "patient triage"
       - "symptom checker"
       - "telemedicine"
-      - "mental health"
       - "precision medicine"
 
   Biometrics:
