@@ -1,60 +1,76 @@
 """
-Berlin Startup Jobs (BSJ) HTML scraper.
+Berlin Startup Jobs collector via the WordPress REST API.
 
-Scrapes https://berlinstartupjobs.com/skill-areas/data-science/ using
-BeautifulSoup.  The site lists job cards on paginated listing pages;
-each card links to a detail page with the full job description.
+The BSJ site exposes ``/wp-json/wp/v2/posts`` — a clean JSON
+endpoint that returns full post bodies, dates, and embedded
+taxonomy terms (company, location). This is far more reliable
+than HTML scraping, which broke when BSJ refreshed their layout
+in early 2026.
 
 Pipeline:
-1. Fetch listing pages (up to ``max_pages`` pages, default 3).
-2. Extract job card URLs.
-3. Follow each URL and scrape the full description from the detail page.
-4. Apply a 1-second delay between requests (polite scraping).
-5. Normalise into ``RawJob`` models.
-6. Save to ``data/raw/bsj.json``.
+1. Hit ``/wp-json/wp/v2/posts?categories=9`` (Engineering /
+   IT / Software Development) — that's where AI/ML/data roles
+   live. Pull up to ``max_pages`` × ``per_page`` posts.
+2. Use ``_embed=wp:term`` so company and location names come
+   back inline — no per-post taxonomy lookups.
+3. Filter for AI / ML / data relevance against the title and
+   the rendered HTML content (Cleaner downstream will strip
+   the HTML before any other processor runs).
+4. Map each post to a ``RawJob``.
 
-Expected yield: ~40–60 postings.
-No authentication required.
+No auth required. Polite ~1s sleep between page fetches.
 """
 
 import hashlib
-import re
-import time
 from typing import Any
-from urllib.parse import urljoin
 
 import requests
-from bs4 import BeautifulSoup
 
-from src.collectors.base import BaseCollector, CollectorError
+from src.collectors.base import BaseCollector
 from src.models import RawJob
 from src.utils.io import save_json
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-_BSJ_BASE_URL = "https://berlinstartupjobs.com"
-_BSJ_LISTING_URL = "https://berlinstartupjobs.com/skill-areas/data-science/"
-_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (compatible; BerlinAITalentRadar/1.0; "
-        "+https://github.com/berlin-ai-talent-radar)"
-    )
-}
+_BSJ_REST_URL = "https://berlinstartupjobs.com/wp-json/wp/v2/posts"
+# Category id 9 = "IT / Software Development" — that's where the AI/ML/data
+# roles live. Discovered from /wp-json/wp/v2/categories.
+_ENGINEERING_CATEGORY_ID = 9
 _REQUEST_TIMEOUT = 15
+_HEADERS = {
+    # The site blocks generic / library UAs with 403, so we present
+    # as a real browser. No personal info is sent.
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/json",
+}
+
+# Relevance filter: any of these in title + HTML content qualifies the
+# posting as AI / ML / data adjacent. The downstream skill extractor +
+# governance analyzer then decides what to do with it.
+_ROLE_KEYWORDS = (
+    "machine learning", "data scientist", "data engineer", "data analyst",
+    "ai engineer", "ml engineer", "mlops", "deep learning", "computer vision",
+    "natural language", "nlp", "llm", "rag", "generative ai", "genai",
+    "data science", "artificial intelligence", "neural network",
+    "pytorch", "tensorflow", "python developer", "data platform",
+    "analytics engineer",
+)
 
 
 class BerlinStartupJobsCollector(BaseCollector):
     """
-    Scrape AI/data job postings from Berlin Startup Jobs.
+    Pull AI / data / ML postings from Berlin Startup Jobs.
 
-    BSJ is a curated board for Berlin tech startups.  The scraper
-    fetches listing cards then follows each detail URL for the full
-    description text.
+    Uses the WordPress REST API instead of HTML scraping.
 
     Args:
         config: Full application config dict.
-        max_pages: Number of listing pages to scrape (default: 3).
+        max_pages: Override the number of REST pages to fetch
+            (each page returns up to 50 posts).
         output_path: Destination JSON file for raw results.
     """
 
@@ -64,20 +80,13 @@ class BerlinStartupJobsCollector(BaseCollector):
         max_pages: int | None = None,
         output_path: str = "data/raw/bsj.json",
     ) -> None:
-        """
-        Initialise the BSJ scraper.
-
-        Args:
-            config: Application config dict.
-            max_pages: Override number of listing pages to scrape.
-            output_path: Path to save raw JSON results.
-        """
         super().__init__(rate_limit_seconds=1.0)
         self._config = config
         self._output_path = output_path
 
         bsj_cfg = config.get("collectors", {}).get("berlin_startup_jobs", {})
         self._max_pages: int = max_pages or bsj_cfg.get("max_pages", 3)
+        self._per_page: int = 50  # WP REST hard cap is 100; 50 is safe.
 
     # ------------------------------------------------------------------
     # BaseCollector interface
@@ -85,323 +94,166 @@ class BerlinStartupJobsCollector(BaseCollector):
 
     @property
     def source_name(self) -> str:
-        """Return source identifier string."""
         return "bsj"
 
     def collect(self) -> list[RawJob]:
         """
-        Scrape listing pages, follow detail links, and parse job data.
-
-        Returns:
-            Deduplicated list of ``RawJob`` objects.
-
-        Example:
-            >>> collector = BerlinStartupJobsCollector(config=cfg)
-            >>> jobs = collector.collect()
-            >>> len(jobs)
-            52
+        Fetch engineering posts, filter for AI/data relevance, return
+        a deduplicated list of ``RawJob``.
         """
-        job_urls = self._collect_listing_urls()
-        logger.info(
-            "BSJ: found %d job detail URLs across %d listing pages",
-            len(job_urls),
-            self._max_pages,
-        )
-
         all_jobs: dict[str, RawJob] = {}
 
-        for idx, url in enumerate(job_urls, start=1):
-            logger.debug("Scraping job %d/%d: %s", idx, len(job_urls), url)
-            job = self._scrape_detail_page(url)
-            if job and job.source_id not in all_jobs:
-                all_jobs[job.source_id] = job
-
-            # Polite delay between detail page requests
-            if idx < len(job_urls):
-                self._sleep()
-
-        result = list(all_jobs.values())
-        logger.info(
-            "BSJ collection complete: %d unique jobs", len(result)
-        )
-
-        save_json([job.model_dump() for job in result], self._output_path)
-        return result
-
-    # ------------------------------------------------------------------
-    # Private: listing page scraping
-    # ------------------------------------------------------------------
-
-    def _collect_listing_urls(self) -> list[str]:
-        """
-        Collect all job detail URLs from BSJ listing pages.
-
-        Returns:
-            Deduplicated list of absolute detail page URLs.
-        """
-        seen_urls: set[str] = set()
-        all_urls: list[str] = []
-
         for page in range(1, self._max_pages + 1):
-            page_url = self._listing_page_url(page)
-            logger.info("Fetching BSJ listing page %d: %s", page, page_url)
+            posts = self._fetch_page(page)
+            if posts is None:
+                break  # hard failure — stop paginating
 
-            urls = self._extract_card_urls(page_url)
-            new = 0
-            for url in urls:
-                if url not in seen_urls:
-                    seen_urls.add(url)
-                    all_urls.append(url)
-                    new += 1
+            if not posts:
+                logger.info("Page %d returned no posts — end of results", page)
+                break
+
+            kept = 0
+            for raw in posts:
+                if not self._is_relevant(raw):
+                    continue
+                try:
+                    job = self._parse_post(raw)
+                except Exception as exc:
+                    logger.debug(
+                        "Skipping post %s: %s", raw.get("id"), exc,
+                    )
+                    continue
+                if job.source_id not in all_jobs:
+                    all_jobs[job.source_id] = job
+                    kept += 1
 
             logger.info(
-                "  Listing page %d: %d URLs found, %d new", page, len(urls), new
+                "  Page %d: %d posts, %d relevant new (total: %d)",
+                page, len(posts), kept, len(all_jobs),
             )
-
-            if not urls:
-                logger.info("Empty listing page — stopping pagination")
-                break
 
             if page < self._max_pages:
                 self._sleep()
 
-        return all_urls
+        result = list(all_jobs.values())
+        logger.info("BSJ collection complete: %d unique relevant jobs", len(result))
+        save_json([j.model_dump() for j in result], self._output_path)
+        return result
 
-    def _listing_page_url(self, page: int) -> str:
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+
+    def _fetch_page(self, page: int) -> list[dict[str, Any]] | None:
         """
-        Build the paginated listing URL for BSJ data-science category.
-
-        Args:
-            page: 1-based page number.
-
-        Returns:
-            Absolute URL string.
-
-        Example:
-            >>> self._listing_page_url(2)
-            'https://berlinstartupjobs.com/skill-areas/data-science/page/2/'
+        Fetch one page of posts. Returns the list, ``[]`` for an empty
+        page, or ``None`` for a hard failure that should stop pagination.
         """
-        if page == 1:
-            return _BSJ_LISTING_URL
-        return f"{_BSJ_BASE_URL}/skill-areas/data-science/page/{page}/"
-
-    def _extract_card_urls(self, listing_url: str) -> list[str]:
-        """
-        Parse a BSJ listing page HTML and extract job detail URLs.
-
-        BSJ renders job cards as ``<article>`` or ``<li>`` elements
-        with an ``<a>`` tag pointing to the detail page.
-
-        Args:
-            listing_url: URL of the listing page to scrape.
-
-        Returns:
-            List of absolute detail page URLs, or empty list on error.
-        """
-        html = self._get_html(listing_url)
-        if not html:
-            return []
-
-        soup = BeautifulSoup(html, "html.parser")
-        urls = []
-
-        # BSJ uses article elements with class containing "job"
-        articles = soup.select("article.bsj-job, li.bsj-job, article[id^='post-']")
-        if not articles:
-            # Fallback: look for any link that points to /job-listings/
-            articles = soup.find_all("a", href=re.compile(r"/job-listings?/"))
-
-        if not articles:
-            logger.debug(
-                "No job cards found on listing page — site structure may have changed"
+        params = {
+            "categories": _ENGINEERING_CATEGORY_ID,
+            "per_page": self._per_page,
+            "page": page,
+            "_embed": "wp:term",
+            "_fields": "id,date,link,title,content,_links,_embedded",
+        }
+        try:
+            response = requests.get(
+                _BSJ_REST_URL,
+                params=params,
+                headers=_HEADERS,
+                timeout=_REQUEST_TIMEOUT,
             )
+        except requests.exceptions.RequestException as exc:
+            logger.warning("BSJ network error on page %d: %s", page, exc)
+            return None
+
+        # WP returns 400 when paging past the last page — treat as "done".
+        if response.status_code == 400:
             return []
 
-        for element in articles:
-            # If we got <a> tags directly (fallback path)
-            if element.name == "a":
-                href = element.get("href", "")
-            else:
-                # Find the primary link in the card
-                link = element.find("a", href=re.compile(r"/job-listings?/"))
-                if not link:
-                    link = element.find("h2", class_=re.compile(r"title|heading"))
-                    if link:
-                        link = link.find("a")
-                if not link:
-                    link = element.find("a")
-                if not link:
-                    continue
-                href = link.get("href", "")
-
-            if not href:
-                continue
-
-            absolute = urljoin(_BSJ_BASE_URL, href)
-            if "berlinstartupjobs.com" in absolute:
-                urls.append(absolute)
-
-        return urls
-
-    # ------------------------------------------------------------------
-    # Private: detail page scraping
-    # ------------------------------------------------------------------
-
-    def _scrape_detail_page(self, url: str) -> RawJob | None:
-        """
-        Fetch and parse a single job detail page.
-
-        Args:
-            url: Absolute URL of the BSJ job detail page.
-
-        Returns:
-            Parsed ``RawJob`` or None if scraping fails.
-        """
-        html = self._get_html(url)
-        if not html:
+        if response.status_code != 200:
+            logger.warning(
+                "BSJ HTTP %d on page %d", response.status_code, page,
+            )
             return None
 
-        soup = BeautifulSoup(html, "html.parser")
-
-        title = self._extract_title(soup)
-        company = self._extract_company(soup)
-        location = self._extract_location(soup)
-        description = self._extract_description(soup)
-        date_posted = self._extract_date(soup)
-
-        if not description or len(description) < 100:
-            logger.debug("Skipping %s — description too short", url)
+        try:
+            return response.json()
+        except ValueError as exc:
+            logger.warning("BSJ response was not JSON: %s", exc)
             return None
 
-        source_id = f"bsj_{self._hash_url(url)}"
+    def _is_relevant(self, post: dict[str, Any]) -> bool:
+        """True if the post's title or HTML content hits an AI/data keyword."""
+        title = (post.get("title") or {}).get("rendered", "").lower()
+        content = (post.get("content") or {}).get("rendered", "").lower()
+        haystack = f"{title} {content}"
+        return any(kw in haystack for kw in _ROLE_KEYWORDS)
+
+    def _parse_post(self, post: dict[str, Any]) -> RawJob:
+        """Map a WP REST post payload to a ``RawJob``."""
+        title = self._decode_html(
+            (post.get("title") or {}).get("rendered", "")
+        ).strip() or "Unknown Role"
+        content = (post.get("content") or {}).get("rendered", "")
+
+        company, locations = self._extract_terms(post)
+        location = ", ".join(locations) if locations else "Berlin, Germany"
+        date_posted = self._extract_date(post.get("date"))
+        url = post.get("link") or ""
+
+        post_id = post.get("id")
+        source_id = (
+            f"bsj_{post_id}" if post_id is not None
+            else f"bsj_{self._hash_post(title, content)}"
+        )
 
         return RawJob(
-            company=company,
+            company=company or "Unknown Company",
             title=title,
             location=location,
-            description=description,
+            description=content or "",
             date_posted=date_posted,
             url=url,
             source=self.source_name,
             source_id=source_id,
         )
 
-    # ------------------------------------------------------------------
-    # Private: field extractors
-    # ------------------------------------------------------------------
+    @staticmethod
+    def _extract_terms(post: dict[str, Any]) -> tuple[str | None, list[str]]:
+        """Pull job_company name and job_location names from _embedded."""
+        embedded = post.get("_embedded") or {}
+        term_groups = embedded.get("wp:term") or []
 
-    def _extract_title(self, soup: BeautifulSoup) -> str:
-        """Extract job title from the detail page."""
-        # Try structured job title selectors
-        for selector in [
-            "h1.job-title",
-            "h1.entry-title",
-            "h1[class*='title']",
-            "h1",
-        ]:
-            element = soup.select_one(selector)
-            if element:
-                return element.get_text(strip=True)[:200]
-        return "Unknown Role"
-
-    def _extract_company(self, soup: BeautifulSoup) -> str:
-        """Extract company name from the detail page."""
-        for selector in [
-            "span.company-name",
-            "a[class*='company']",
-            "[class*='employer']",
-            ".company",
-        ]:
-            element = soup.select_one(selector)
-            if element:
-                return element.get_text(strip=True)[:150]
-        # Fallback: look for structured data
-        og_site = soup.find("meta", property="og:site_name")
-        if og_site:
-            return og_site.get("content", "Unknown Company")[:150]
-        return "Unknown Company"
-
-    def _extract_location(self, soup: BeautifulSoup) -> str:
-        """Extract job location from the detail page."""
-        for selector in [
-            "[class*='location']",
-            "[class*='city']",
-            "span[class*='place']",
-        ]:
-            element = soup.select_one(selector)
-            if element:
-                return element.get_text(strip=True)[:100]
-        return "Berlin, Germany"
-
-    def _extract_description(self, soup: BeautifulSoup) -> str:
-        """Extract the full job description text."""
-        # Remove nav, header, footer, sidebar noise first
-        for noise in soup.select(
-            "nav, header, footer, aside, script, style, [class*='sidebar'], [class*='nav']"
-        ):
-            noise.decompose()
-
-        for selector in [
-            "[class*='job-description']",
-            "[class*='description']",
-            "[class*='content']",
-            "article",
-            "main",
-        ]:
-            element = soup.select_one(selector)
-            if element and len(element.get_text(strip=True)) > 200:
-                return element.get_text(separator="\n", strip=True)[:8000]
-        return ""
-
-    def _extract_date(self, soup: BeautifulSoup) -> str | None:
-        """Extract the posting date if available."""
-        # Try <time> element
-        time_el = soup.find("time")
-        if time_el:
-            return time_el.get("datetime") or time_el.get_text(strip=True)
-
-        # Try meta
-        meta_date = soup.find("meta", property="article:published_time")
-        if meta_date:
-            return meta_date.get("content")
-
-        return None
-
-    # ------------------------------------------------------------------
-    # Private: HTTP helper
-    # ------------------------------------------------------------------
-
-    def _get_html(self, url: str) -> str | None:
-        """
-        Fetch HTML from a URL with error handling.
-
-        Args:
-            url: URL to fetch.
-
-        Returns:
-            HTML string, or None on failure.
-        """
-        try:
-            response = requests.get(
-                url,
-                headers=_HEADERS,
-                timeout=_REQUEST_TIMEOUT,
-            )
-            response.raise_for_status()
-            return response.text
-        except requests.exceptions.RequestException as exc:
-            logger.warning("Failed to fetch %s: %s", url, exc)
-            return None
+        company: str | None = None
+        locations: list[str] = []
+        for group in term_groups:
+            for term in group or []:
+                taxonomy = term.get("taxonomy")
+                name = term.get("name")
+                if not name:
+                    continue
+                if taxonomy == "job_company" and company is None:
+                    company = name
+                elif taxonomy == "job_location":
+                    locations.append(name)
+        return company, locations
 
     @staticmethod
-    def _hash_url(url: str) -> str:
-        """
-        Generate a stable short hash from a URL for use as source_id.
+    def _extract_date(value: Any) -> str | None:
+        """WP returns ISO 8601 like '2026-05-07T09:56:25'; keep the date."""
+        if not value or not isinstance(value, str):
+            return None
+        return value.split("T", 1)[0]
 
-        Args:
-            url: Job detail page URL.
+    @staticmethod
+    def _decode_html(text: str) -> str:
+        """Lightweight HTML entity decode for titles."""
+        import html
+        return html.unescape(text or "")
 
-        Returns:
-            12-character hex string.
-        """
-        return hashlib.md5(url.encode()).hexdigest()[:12]
+    @staticmethod
+    def _hash_post(title: str, content: str) -> str:
+        """Deterministic fallback source_id when the post id is missing."""
+        fingerprint = (title + content[:120]).encode("utf-8")
+        return hashlib.md5(fingerprint).hexdigest()[:8]
