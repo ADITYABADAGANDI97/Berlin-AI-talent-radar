@@ -12,7 +12,7 @@ from __future__ import annotations
 import pytest
 
 
-def test_pipeline_enriches_and_dedupes(make_raw):
+def test_pipeline_enriches_and_dedupes(tmp_path, make_raw):
     from src.processors import EnrichmentPipeline
 
     raw = [
@@ -47,7 +47,7 @@ def test_pipeline_enriches_and_dedupes(make_raw):
     ]
 
     pipeline = EnrichmentPipeline()
-    enriched = pipeline.enrich(raw)
+    enriched = pipeline.enrich(raw, output_path=tmp_path / "enriched.json")
 
     assert len(enriched) == 2, "near-duplicates should merge cross-source"
     companies = {j.company for j in enriched}
@@ -69,7 +69,7 @@ def test_pipeline_enriches_and_dedupes(make_raw):
     assert werk.eu_ai_act.is_ai_role is False
 
 
-def test_governance_gap_does_not_fire_when_keywords_present(make_raw):
+def test_governance_gap_does_not_fire_when_keywords_present(tmp_path, make_raw):
     """A posting with human oversight + bias audit must NOT be a gap."""
     from src.processors import EnrichmentPipeline
 
@@ -83,7 +83,7 @@ def test_governance_gap_does_not_fire_when_keywords_present(make_raw):
         source="arbeitnow",
     )]
 
-    enriched = EnrichmentPipeline().enrich(raw)
+    enriched = EnrichmentPipeline().enrich(raw, output_path=tmp_path / "enriched.json")
     assert len(enriched) == 1
     bio = enriched[0]
     assert bio.eu_ai_act.is_ai_role is True
@@ -93,7 +93,7 @@ def test_governance_gap_does_not_fire_when_keywords_present(make_raw):
     assert bio.eu_ai_act.governance_keyword_count > 0
 
 
-def test_arch_exec_score_separates_principal_from_junior(make_raw):
+def test_arch_exec_score_separates_principal_from_junior(tmp_path, make_raw):
     from src.processors import EnrichmentPipeline
 
     principal = make_raw(
@@ -111,13 +111,15 @@ def test_arch_exec_score_separates_principal_from_junior(make_raw):
         "0-2 years experience. " * 5,
         "j2",
     )
-    enriched = EnrichmentPipeline().enrich([principal, junior])
+    enriched = EnrichmentPipeline().enrich(
+        [principal, junior], output_path=tmp_path / "enriched.json",
+    )
     by_seniority = {j.seniority: j for j in enriched}
     assert by_seniority["lead"].arch_exec_score > 0.7
     assert by_seniority["junior"].arch_exec_score < 0.4
 
 
-def test_pipeline_skips_short_descriptions(make_raw):
+def test_pipeline_skips_short_descriptions(tmp_path, make_raw):
     """Cleaner drops postings whose cleaned text is < min_description_length."""
     from src.processors import EnrichmentPipeline
 
@@ -125,7 +127,7 @@ def test_pipeline_skips_short_descriptions(make_raw):
         make_raw("OK Co", "Engineer", "x" * 200 + " job description", "ok1"),
         make_raw("Too Short", "Engineer", "tiny job desc", "ts1"),
     ]
-    enriched = EnrichmentPipeline().enrich(raw)
+    enriched = EnrichmentPipeline().enrich(raw, output_path=tmp_path / "enriched.json")
     companies = {j.company for j in enriched}
     assert "OK Co" in companies
     assert "Too Short" not in companies
