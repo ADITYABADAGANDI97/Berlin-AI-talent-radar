@@ -44,6 +44,16 @@ def load_analytics() -> dict | None:
     return load_json(path)
 
 
+@st.cache_data
+def load_enriched_jobs() -> list[dict]:
+    """Load the per-posting enriched records — only needed by tabs that
+    drill into individual postings (e.g. the governance-gap company list)."""
+    path = PROJECT_ROOT / "data" / "processed" / "enriched_jobs.json"
+    if not path.exists():
+        return []
+    return load_json(path)
+
+
 # =============================================================================
 # Tabs
 # =============================================================================
@@ -257,6 +267,530 @@ def tab_governance(data: dict) -> None:
         fig.update_layout(yaxis=dict(autorange="reversed"))
         st.plotly_chart(fig, use_container_width=True)
 
+    # ------------------------------------------------------------------
+    # Per-posting gap detail — articulates *where* each posting fails:
+    # which Annex III domain triggers them, which EU AI Act articles
+    # they're obliged to address, and which specific obligations they
+    # did NOT demonstrate awareness of in the posting text.
+    # ------------------------------------------------------------------
+    st.subheader("⚠️ Where these postings fail to comply")
+    st.caption(
+        "Each posting below is an AI role in an EU AI Act Annex III "
+        "high-risk domain whose public text addresses **none** of the "
+        "governance obligations that apply to it. The breakdown names "
+        "the specific articles and what each requires."
+    )
+
+    enriched = load_enriched_jobs()
+    gap_postings = [
+        j for j in enriched
+        if j.get("eu_ai_act", {}).get("governance_gap")
+    ]
+
+    if not gap_postings:
+        st.info("No governance gaps in the current dataset.")
+    else:
+        _render_gap_postings(gap_postings, gov.get("days_to_enforcement", 0))
+
+
+# Maps EU AI Act article numbers → short label + the governance keywords
+# that would signal awareness of that article's obligations. The article
+# texts themselves live in config/eu_ai_act_articles.yaml; this is the
+# detection-vocabulary projection of them used to articulate *what*
+# compliance signal a posting failed to demonstrate.
+_ARTICLE_OBLIGATIONS: dict[int, dict[str, object]] = {
+    9: {
+        "label": "Risk management system",
+        "keywords": ["risk assessment", "risk management", "ai risk",
+                     "iterative risk"],
+    },
+    10: {
+        "label": "Data & data governance (incl. bias)",
+        "keywords": ["bias", "data governance", "training data",
+                     "data quality", "dataset documentation"],
+    },
+    11: {
+        "label": "Technical documentation",
+        "keywords": ["model card", "technical documentation",
+                     "model documentation"],
+    },
+    13: {
+        "label": "Transparency to deployers",
+        "keywords": ["transparency", "explainability", "interpretable",
+                     "interpretability"],
+    },
+    14: {
+        "label": "Human oversight",
+        "keywords": ["human oversight", "human-in-the-loop",
+                     "human in the loop", "human review"],
+    },
+    15: {
+        "label": "Accuracy, robustness, cybersecurity",
+        "keywords": ["robustness", "model monitoring", "model drift",
+                     "accuracy testing"],
+    },
+    26: {
+        "label": "Deployer obligations",
+        "keywords": ["compliance", "audit", "conformity assessment",
+                     "responsible ai", "ai governance"],
+    },
+    50: {
+        "label": "Transparency to natural persons",
+        "keywords": ["informed", "user disclosure", "ai notice"],
+    },
+}
+
+
+def _render_gap_postings(postings: list[dict], days_to_enforce: int) -> None:
+    """Render one expander per gap-flagged posting with article-level detail."""
+    # Group by domain so the user can scan a healthcare bucket, an
+    # employment bucket, etc.
+    by_domain: dict[str, list[dict]] = {}
+    for p in postings:
+        domains = p["eu_ai_act"].get("high_risk_domains") or ["(unspecified)"]
+        for d in domains:
+            by_domain.setdefault(d, []).append(p)
+
+    for domain in sorted(by_domain.keys()):
+        bucket = by_domain[domain]
+        st.markdown(
+            f"#### {domain.replace('_', ' ')} — {len(bucket)} posting(s)"
+        )
+        for p in bucket:
+            title = p["title"] or "Untitled"
+            company = p["company"] or "Unknown"
+            articles = p["eu_ai_act"].get("relevant_articles") or []
+            url = p.get("url", "")
+
+            header = f"**{company}** — {title[:80]}"
+            with st.expander(header):
+                if url:
+                    st.markdown(f"[Open original posting ↗]({url})")
+                st.markdown(
+                    f"**Source:** `{p.get('source', '?')}`  •  "
+                    f"**Posted:** {(p.get('date_posted') or 'unknown')[:10]}"
+                )
+                st.markdown(
+                    f"**Annex III domain:** {domain.replace('_', ' ')} "
+                    f"→ triggers Articles "
+                    f"**{', '.join(str(a) for a in articles)}**"
+                )
+
+                # Spell out what they failed to address.
+                st.markdown("**Obligations not addressed in the posting:**")
+                missing_rows = []
+                for art in articles:
+                    spec = _ARTICLE_OBLIGATIONS.get(art)
+                    if not spec:
+                        continue
+                    expected = ", ".join(f"`{kw}`" for kw in spec["keywords"])
+                    missing_rows.append(
+                        f"- ❌ **Article {art} — {spec['label']}.** "
+                        f"Posting contained none of: {expected}."
+                    )
+                if missing_rows:
+                    st.markdown("\n".join(missing_rows))
+                else:
+                    st.markdown(
+                        "_No article-level keyword catalogue is wired up "
+                        "for this domain yet — only the headline gap is reported._"
+                    )
+
+    st.caption(
+        f"All {len(postings)} flagged postings are real, live job ads — "
+        "click any \"Open original posting\" link to verify. The "
+        "absence of governance keywords in a public posting does not by "
+        "itself prove non-compliance, but with "
+        f"**{days_to_enforce} days** until enforcement (2 Aug 2026, "
+        "max penalty €35M / 7% global turnover) it's a strong basis "
+        "for vendor due-diligence questions."
+    )
+
+
+def tab_vendor_audit(data: dict) -> None:
+    """
+    Tab 5: Vendor Audit.
+
+    Two action-oriented tools that sit on top of the same enriched
+    dataset that powers the rest of the dashboard:
+
+      1. **Compare companies side-by-side** — pick 2-4 employers from
+         the dataset and see their AI-roles count, governance-gap
+         count, top skills, seniority mix, and arch-exec mean in a
+         single table. Useful when an HR / procurement team is
+         choosing between two vendors that build AI for the same
+         domain (e.g. two ATS providers, two credit-scoring engines).
+
+      2. **Generate a vendor questionnaire** — pick a company (or
+         filter to a domain) and the dashboard renders a markdown
+         questionnaire built from the EU AI Act articles triggered by
+         that company's postings. The output is copy-pasteable into
+         an email or RFP — one section per Article, each with the
+         specific compliance evidence to ask for.
+    """
+    import pandas as pd
+
+    enriched = load_enriched_jobs()
+    if not enriched:
+        st.warning(
+            "No enriched data found. Run "
+            "`python main.py process` to enable this tab."
+        )
+        return
+
+    st.header("Vendor Audit")
+    st.caption(
+        "Turn the dashboard data into procurement actions: compare "
+        "potential vendors against each other, or generate a ready-to-send "
+        "compliance questionnaire grounded in the EU AI Act articles their "
+        "postings trigger."
+    )
+
+    audit_a, audit_b = st.tabs(
+        ["🔬 Compare companies", "📋 Generate questionnaire"],
+    )
+
+    with audit_a:
+        _render_company_compare(enriched, pd)
+
+    with audit_b:
+        _render_questionnaire(enriched, data.get("governance", {}) or {})
+
+
+def _render_company_compare(enriched: list[dict], pd) -> None:
+    """Side-by-side comparison panel."""
+    by_company: dict[str, list[dict]] = {}
+    for j in enriched:
+        by_company.setdefault(j["company"], []).append(j)
+
+    # Sort companies by AI role count so the dropdown's default order
+    # surfaces the names that have the most signal.
+    ordered = sorted(
+        by_company.items(),
+        key=lambda kv: sum(
+            1 for j in kv[1] if j["eu_ai_act"]["is_ai_role"]
+        ),
+        reverse=True,
+    )
+    all_companies = [c for c, _ in ordered]
+
+    default_picks = [c for c in all_companies if len(by_company[c]) > 1][:3]
+    if not default_picks:
+        default_picks = all_companies[:3]
+
+    picks = st.multiselect(
+        "Pick 2-4 companies to compare",
+        options=all_companies,
+        default=default_picks,
+        max_selections=4,
+    )
+
+    if len(picks) < 2:
+        st.info("Pick at least two companies to see the comparison.")
+        return
+
+    rows: list[dict[str, object]] = []
+    for company in picks:
+        jobs = by_company[company]
+        ai = [j for j in jobs if j["eu_ai_act"]["is_ai_role"]]
+        high_risk = [
+            j for j in ai
+            if j["eu_ai_act"]["touches_high_risk_domain"]
+        ]
+        gaps = [j for j in high_risk if j["eu_ai_act"]["governance_gap"]]
+
+        # Top 5 skills across all postings
+        from collections import Counter
+        skill_counter: Counter = Counter()
+        for j in jobs:
+            for s in j.get("all_skills_flat", []):
+                skill_counter[s] += 1
+        top_skills = ", ".join(s for s, _ in skill_counter.most_common(5))
+
+        # Mean arch-exec
+        scores = [j["arch_exec_score"] for j in jobs]
+        mean_arch = (
+            f"{sum(scores) / len(scores):.2f}" if scores else "—"
+        )
+
+        # Seniority mix
+        sen_counter: Counter = Counter(j["seniority"] for j in jobs)
+        sen_mix = ", ".join(
+            f"{lvl}:{n}" for lvl, n in sen_counter.most_common()
+        )
+
+        # Annex III domains touched (deduped across postings)
+        domains: set[str] = set()
+        for j in high_risk:
+            domains.update(j["eu_ai_act"]["high_risk_domains"])
+
+        # Governance keywords ever mentioned (across all postings)
+        gov_kw: set[str] = set()
+        for j in jobs:
+            gov_kw.update(j["eu_ai_act"]["governance_keywords_found"])
+
+        rows.append({
+            "Metric": "Company",
+            company: company,
+        })
+        rows.append({
+            "Metric": "Total postings", company: len(jobs),
+        })
+        rows.append({
+            "Metric": "AI roles", company: len(ai),
+        })
+        rows.append({
+            "Metric": "High-risk AI roles (Annex III)",
+            company: len(high_risk),
+        })
+        rows.append({
+            "Metric": "Governance gaps", company: len(gaps),
+        })
+        rows.append({
+            "Metric": "Annex III domains",
+            company: ", ".join(sorted(domains)) or "—",
+        })
+        rows.append({
+            "Metric": "Mean arch-exec score", company: mean_arch,
+        })
+        rows.append({
+            "Metric": "Top 5 skills",
+            company: top_skills or "—",
+        })
+        rows.append({
+            "Metric": "Seniority mix", company: sen_mix or "—",
+        })
+        rows.append({
+            "Metric": "Governance keywords mentioned",
+            company: ", ".join(sorted(gov_kw)) or "(none)",
+        })
+
+    # Pivot so each company is a column.
+    df = pd.DataFrame(rows).groupby("Metric", sort=False).first().reset_index()
+    df = df[["Metric"] + picks]
+    st.dataframe(df, use_container_width=True, hide_index=True)
+
+    # Highlight which picks have governance gaps as a quick verdict line.
+    gap_status = []
+    for c in picks:
+        n_gaps = sum(
+            1 for j in by_company[c]
+            if j["eu_ai_act"]["governance_gap"]
+        )
+        if n_gaps:
+            gap_status.append(f"⚠️ **{c}** — {n_gaps} gap posting(s)")
+        else:
+            gap_status.append(f"✅ **{c}** — no gap postings in dataset")
+    st.markdown("**Compliance signal:**  •  " + "  •  ".join(gap_status))
+
+
+def _render_questionnaire(enriched: list[dict], gov_summary: dict) -> None:
+    """Markdown questionnaire generator panel."""
+    # Build the universe of companies that have at least one gap — those
+    # are the ones a procurement team would actually want to question.
+    gap_companies = sorted({
+        j["company"] for j in enriched
+        if j["eu_ai_act"]["governance_gap"]
+    })
+
+    if not gap_companies:
+        st.info(
+            "No companies with governance gaps in the current dataset. "
+            "Refresh with `python main.py collect && python main.py process` "
+            "to pull a fresh sample."
+        )
+        return
+
+    company = st.selectbox(
+        "Pick a company to generate a questionnaire for",
+        options=gap_companies,
+        index=0,
+    )
+
+    # Gather all gap postings for this company so the questionnaire
+    # covers every Annex III domain they touch.
+    postings = [
+        j for j in enriched
+        if j["company"] == company and j["eu_ai_act"]["governance_gap"]
+    ]
+    domains = sorted({
+        d for p in postings
+        for d in p["eu_ai_act"]["high_risk_domains"]
+    })
+    articles = sorted({
+        a for p in postings
+        for a in p["eu_ai_act"]["relevant_articles"]
+    })
+
+    days = gov_summary.get("days_to_enforcement", 0)
+    penalty = gov_summary.get("max_penalty_eur", 35_000_000)
+
+    md = _build_questionnaire_markdown(
+        company=company,
+        postings=postings,
+        domains=domains,
+        articles=articles,
+        days_to_enforce=days,
+        max_penalty_eur=penalty,
+    )
+
+    st.markdown("---")
+    st.markdown(md)
+    st.markdown("---")
+    st.download_button(
+        label="⬇️ Download questionnaire (.md)",
+        data=md,
+        file_name=f"{company.replace(' ', '_')}_eu_ai_act_audit.md",
+        mime="text/markdown",
+    )
+
+
+def _build_questionnaire_markdown(
+    company: str,
+    postings: list[dict],
+    domains: list[str],
+    articles: list[int],
+    days_to_enforce: int,
+    max_penalty_eur: int,
+) -> str:
+    """Compose a markdown questionnaire grounded in the relevant Articles."""
+    lines: list[str] = []
+    lines.append(f"# EU AI Act Compliance Questionnaire — {company}")
+    lines.append("")
+    lines.append(
+        f"**Context.** {company} has {len(postings)} public job posting(s) "
+        f"in our dataset that describe building or deploying AI in "
+        f"{', '.join(d.replace('_', ' ') for d in domains)} — a high-risk "
+        f"domain under Annex III of the EU AI Act "
+        f"(Regulation EU 2024/1689). The postings do not address the "
+        f"governance obligations that apply. With **{days_to_enforce} "
+        f"days** until enforcement (2 August 2026, max penalty "
+        f"€{max_penalty_eur:,} / 7% global turnover), the following "
+        f"questions ask for the compliance evidence that should exist "
+        f"regardless of whether it appears in recruiting material."
+    )
+    lines.append("")
+    lines.append("## Postings referenced")
+    lines.append("")
+    for p in postings:
+        title = p.get("title", "Untitled")
+        url = p.get("url", "")
+        if url:
+            lines.append(f"- [{title}]({url})")
+        else:
+            lines.append(f"- {title}")
+    lines.append("")
+
+    if not articles:
+        lines.append(
+            "_No specific EU AI Act articles were derivable from the "
+            "domain match. Treat the headline gap as the only signal._"
+        )
+        return "\n".join(lines)
+
+    for art in articles:
+        spec = _ARTICLE_OBLIGATIONS.get(art)
+        if not spec:
+            continue
+        lines.append(f"## Article {art} — {spec['label']}")
+        lines.append("")
+        # Compose 2-3 audit questions per article. Keep these
+        # vendor-facing: each question should be answerable with a
+        # document, a process description, or an artefact.
+        questions = _questions_for_article(art)
+        for q in questions:
+            lines.append(f"- [ ] {q}")
+        lines.append("")
+        lines.append(
+            f"_Public posting did not mention any of: "
+            f"{', '.join('`' + k + '`' for k in spec['keywords'])}._"
+        )
+        lines.append("")
+
+    lines.append("---")
+    lines.append(
+        "_Questionnaire generated automatically from job-posting analysis. "
+        "Absence of a governance keyword in a posting is a signal, not "
+        "proof of non-compliance — but every question above is one a "
+        "deployer is obliged to answer under the cited Article."
+    )
+    return "\n".join(lines)
+
+
+def _questions_for_article(article: int) -> list[str]:
+    """Concrete audit questions per Article. Vendor-answerable, not vague."""
+    catalogue = {
+        9: [
+            "Provide the documented risk management process for this "
+            "AI system covering its full lifecycle (design, development, "
+            "deployment, monitoring).",
+            "Show the most recent risk assessment and the residual risks "
+            "you accepted, with the rationale.",
+            "Describe how the risk management system is reviewed and "
+            "updated when material changes occur.",
+        ],
+        10: [
+            "Provide a description of the training, validation and "
+            "test data sets — sources, collection periods, and "
+            "preparation steps.",
+            "What measures detect, prevent and mitigate bias in the "
+            "data and the resulting model output?",
+            "How is data quality monitored over time, including drift "
+            "and representativity of the deployment population?",
+        ],
+        11: [
+            "Provide the technical documentation that demonstrates "
+            "conformity with Articles 9-15 — including model "
+            "architecture, training methodology, and performance "
+            "metrics.",
+            "Provide the most recent version of the model card / "
+            "model documentation shared with deployers.",
+        ],
+        13: [
+            "Describe the information you provide to deployers so they "
+            "can interpret model output correctly and understand its "
+            "limits.",
+            "What's your communicated guidance on intended use, "
+            "foreseeable misuse, and known performance limitations?",
+        ],
+        14: [
+            "Describe the human-oversight mechanisms available to "
+            "deployers — including the controls a human operator can "
+            "use to intervene, override, or disable the system.",
+            "Who at the deployer organisation is identified as the "
+            "responsible human overseer, and what training are they "
+            "given?",
+            "How are oversight events (intervention, override) logged "
+            "and reviewed?",
+        ],
+        15: [
+            "Provide the published accuracy, robustness and "
+            "cybersecurity metrics for the model, with the test "
+            "methodology used.",
+            "How is the model resilient to data poisoning, model "
+            "evasion, and adversarial inputs?",
+            "What's the monitoring posture for accuracy drift in "
+            "production, and what triggers retraining?",
+        ],
+        26: [
+            "Confirm conformity assessment status (self-assessment "
+            "vs. third-party, notified body involved).",
+            "Provide the CE marking documentation and the registration "
+            "entry in the EU database (Article 49).",
+            "Provide the deployer-facing instructions for use "
+            "(Article 13(2)).",
+        ],
+        50: [
+            "Describe how natural persons interacting with the system "
+            "are informed they are interacting with an AI system.",
+            "If the system generates synthetic content, describe the "
+            "machine-readable marking applied.",
+        ],
+    }
+    return catalogue.get(article, [
+        f"Provide the compliance evidence required under Article {article}.",
+    ])
+
 
 def tab_rag_chat(data: dict) -> None:
     """Tab 5: RAG Chat Interface."""
@@ -345,6 +879,7 @@ def main() -> None:
         "🛠️ Skills",
         "⚖️ Arch-Exec Spectrum",
         "🇪🇺 Governance Gaps",
+        "🛡️ Vendor Audit",
         "💬 RAG Chat",
     ])
     with tabs[0]:
@@ -356,6 +891,8 @@ def main() -> None:
     with tabs[3]:
         tab_governance(analytics)
     with tabs[4]:
+        tab_vendor_audit(analytics)
+    with tabs[5]:
         tab_rag_chat(analytics)
 
     st.sidebar.markdown("---")
